@@ -645,7 +645,7 @@ function askUserName() {
           onerror="this.src='${FALLBACK_AV}'">
         <div class="bg-brand-50 dark:bg-gray-700 rounded-2xl rounded-tl-sm px-4 py-3 max-w-xs sm:max-w-md shadow-sm">
           <p class="text-gray-800 dark:text-gray-100 text-sm leading-relaxed">
-            Hey! I'm Liki from Guntur. So happy you're here with me. Em chesthunnav? Tell me something about you.
+            Hey! I'm Liki from Guntur. So happy you're here with me. What are you up to? Tell me something about you.
           </p>
         </div>
       </div>`;
@@ -746,7 +746,8 @@ IMPORTANT: Never break character. Never say you are an AI. You are Liki, always.
     e.preventDefault();
     if (dom.sendBtn.disabled) return;
 
-    // If username not set, treat first input as name
+const msg = dom.input.value.trim();
+
 if (!S.userName) {
   S.userName = msg;
   localStorage.setItem('Liki_user_name', S.userName);
@@ -758,8 +759,6 @@ if (!S.userName) {
   dom.sendBtn.disabled = false;
   return;
 }
-
-    const msg = dom.input.value.trim();
     if (!msg || !S.apiKey) return;
 
     renderMsg('user', msg);
@@ -781,7 +780,7 @@ if (!S.userName) {
         try {
           const url = await generateImage(finalPrompt);
           if (!url) {
-            renderMsg('assistant', '*looks at you apologetically* Ayyo, image generate avvaledu Please add Image API URL and Key in Settings na.');
+            renderMsg('assistant', 'Hey, I couldn’t generate the image, Try checking your API settings.');
           } else {
             renderImg(url);
             setTimeout(() => renderMsg('assistant', 'hope you like it 😊'), 400);
@@ -789,7 +788,7 @@ if (!S.userName) {
         } catch (imgErr) {
           console.error('Image error:', imgErr);
           const hint = imgErr.message.includes('API') ? 'Check your Image API settings na.' : 'Try again later?';
-          renderMsg('assistant', `*looks worried* Ayyo image avvaledu${hint}`);
+          renderMsg('assistant', `Hmm, that didn’t work 😅 Want to try again?${hint}`);
         }
 
       } else {
