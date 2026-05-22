@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Liki</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Tailwind config MUST come immediately after the CDN script -->
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        colors: {
+          brand: {
+            50: '#fff1f2', 100: '#ffe4e6', 200: '#fecdd3', 300: '#fda4af',
+            400: '#fb7185', 500: '#f43f5e', 600: '#e11d48', 700: '#be123c',
+            800: '#9f1239', 900: '#881337'
+          }
+        },
+        animation: {
+          'pulse-dot': 'pulse-dot 1.4s infinite ease-in-out',
+          'slide-up':  'slide-up 0.3s ease-out',
+          'fade-in':   'fade-in 0.3s ease-out'
+        },
+        keyframes: {
+          'pulse-dot': {
+            '0%, 80%, 100%': { opacity: '0.3', transform: 'scale(0.8)' },
+            '40%': { opacity: '1', transform: 'scale(1)' }
+          },
+          'slide-up': {
+            '0%':   { transform: 'translateY(20px)', opacity: '0' },
+            '100%': { transform: 'translateY(0)',    opacity: '1' }
+          },
+          'fade-in': {
+            '0%':   { opacity: '0' },
+            '100%': { opacity: '1' }
+          }
+        }
+      }
+    }
+  };
+</script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; font-family: 'Inter', sans-serif; }
+html, body { height: 100%; margin: 0; padding: 0; }
+
+/* ── Dark mode CSS fallback (ensures toggle works even before Tailwind JIT) ── */
+html.dark body                    { background-color: #111827; color: #f9fafb; }
+html.dark header                  { background-color: #1f2937; border-color: #374151; }
+html.dark #chat-wrap              { background-color: #1f2937; border-color: #374151; }
+html.dark #messages               { background-color: #1f2937; }
+html.dark #settings-modal > div  { background-color: #1f2937; }
+html.dark .bg-white               { background-color: #1f2937; }
+html.dark .bg-gray-50             { background-color: #111827; }
+html.dark .bg-gray-100            { background-color: #374151; }
+html.dark .bg-gray-700            { background-color: #374151; }
+html.dark .bg-gray-800            { background-color: #1f2937; }
+html.dark .border-gray-200        { border-color: #374151; }
+html.dark .border-gray-700        { border-color: #374151; }
+html.dark .text-gray-900          { color: #f9fafb; }
+html.dark .text-gray-800          { color: #f3f4f6; }
+html.dark .text-gray-700          { color: #d1d5db; }
+html.dark .text-gray-600          { color: #9ca3af; }
+html.dark .text-gray-500          { color: #6b7280; }
+html.dark .text-gray-400          { color: #9ca3af; }
+html.dark .text-gray-300          { color: #d1d5db; }
+html.dark input, html.dark textarea, html.dark select {
+  background-color: #374151;
+  border-color: #4b5563;
+  color: #f9fafb;
+}
+html.dark .hover\:bg-gray-100:hover { background-color: #374151; }
+html.dark .hover\:bg-gray-700:hover { background-color: #374151; }
+html.dark .bg-brand-50            { background-color: #374151; }
+html.dark .from-brand-50          { --tw-gradient-from: #374151; }
+html.dark .to-brand-100           { --tw-gradient-to: #4b5563; }
+html.dark .from-gray-700          { --tw-gradient-from: #374151; }
+html.dark .to-gray-600            { --tw-gradient-to: #4b5563; }
+html.dark .bg-gray-800\/80        { background-color: rgba(31,41,55,0.8); }
+.chat-scroll::-webkit-scrollbar { width: 5px; }
+.chat-scroll::-webkit-scrollbar-track { background: transparent; }
+.chat-scroll::-webkit-scrollbar-thumb { background: rgba(244,63,94,0.3); border-radius: 99px; }
+.dark .chat-scroll::-webkit-scrollbar-thumb { background: rgba(244,63,94,0.45); }
+
+/* Typing animation delays */
+.typing-dot:nth-child(1) { animation-delay: 0s; }
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+/* Range slider thumb */
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: #f43f5e; cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: #f43f5e; cursor: pointer; border: none;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+}
+
+/* *action* text styling */
+.expression { font-style: italic; color: #fb7185; }
+
+/* Full-height layout */
+#app { display: flex; flex-direction: column; min-height: 100vh; }
+main  { flex: 1; display: flex; flex-direction: column; }
+#chat-wrap { flex: 1; display: flex; flex-direction: column; height: calc(100vh - 76px); }
+#messages  { flex: 1; overflow-y: auto; }
+</style>
+</head>
+
+<body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+<div id="app">
+
+  <!-- ══════════ HEADER ══════════ -->
+  <header class="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-40 border-b border-gray-200 dark:border-gray-700">
+    <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+
+      <div class="flex items-center gap-3">
+        <div class="relative flex-shrink-0">
+          <img src="https://tse2.mm.bing.net/th/id/OIP.fWcGapbaaDFEdyVQyWMEEwHaHa?pid=Api&P=0"
+            alt="Liki"
+            class="w-11 h-11 rounded-full object-cover ring-2 ring-brand-400"
+            onerror="this.src='https://ui-avatars.com/api/?name=Liki&background=f43f5e&color=fff'">
+          <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full"></span>
+        </div>
+        <div>
+          <p class="font-semibold text-gray-900 dark:text-white leading-tight">Liki</p>
+          <p class="text-xs text-green-500 font-medium">Online</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-1">
+        <button id="settings-btn" title="Settings"
+          class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+          <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+        </button>
+        <button id="theme-toggle" title="Toggle theme"
+          class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+          <!-- Sun icon: visible in light mode -->
+          <svg id="icon-sun" class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+          </svg>
+          <!-- Moon icon: visible in dark mode -->
+          <svg id="icon-moon" class="w-5 h-5 text-gray-400" style="display:none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ══════════ MAIN ══════════ -->
+  <main class="max-w-4xl w-full mx-auto px-3 py-3">
+    <div id="chat-wrap"
+      class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+
+      <!-- Messages -->
+      <div id="messages" class="chat-scroll p-4 space-y-4">
+        <!-- Welcome -->
+        <div class="flex items-start gap-3">
+          <img src="https://imgcdn.stablediffusionweb.com/2024/10/10/e0767e9f-a289-4fd2-b794-56e7d8e0b675.jpg"
+            alt="Liki" class="w-8 h-8 rounded-full object-cover flex-shrink-0"
+            onerror="this.src='https://ui-avatars.com/api/?name=A&background=f43f5e&color=fff'">
+          <div class="bg-brand-50 dark:bg-gray-700 rounded-2xl rounded-tl-sm px-4 py-3 max-w-xs sm:max-w-md shadow-sm">
+            <p class="text-gray-800 dark:text-gray-100 text-sm leading-relaxed">
+              Hey! I'm Liki from Guntur. Nice to meet you What are you up to?
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Typing indicator -->
+      <div id="typing-indicator" class="hidden px-4 pb-3">
+        <div class="flex items-center gap-3">
+          <img src="https://imgcdn.stablediffusionweb.com/2024/10/10/e0767e9f-a289-4fd2-b794-56e7d8e0b675.jpg"
+            alt="Liki" class="w-8 h-8 rounded-full object-cover flex-shrink-0"
+            onerror="this.src='https://ui-avatars.com/api/?name=A&background=f43f5e&color=fff'">
+          <div class="bg-gray-100 dark:bg-gray-700 rounded-2xl rounded-tl-sm px-4 py-3">
+            <div class="flex gap-1">
+              <div class="typing-dot w-2 h-2 bg-gray-400 rounded-full animate-pulse-dot"></div>
+              <div class="typing-dot w-2 h-2 bg-gray-400 rounded-full animate-pulse-dot"></div>
+              <div class="typing-dot w-2 h-2 bg-gray-400 rounded-full animate-pulse-dot"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Input bar -->
+      <div class="border-t border-gray-200 dark:border-gray-700 p-3 sm:p-4 bg-gray-50 dark:bg-gray-800/80">
+        <div id="api-key-warning"
+          class="hidden mb-3 px-3 py-2 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-xl text-xs text-amber-800 dark:text-amber-300">
+          ⚠️ Add your <strong>Chat API Key</strong> in Settings to start chatting.
+        </div>
+
+        <form id="chat-form" class="flex items-end gap-2">
+          <textarea id="message-input" rows="1"
+            placeholder="Message Liki..."
+            disabled
+            class="flex-1 resize-none rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 transition-all"
+            style="max-height:120px;"></textarea>
+          <button type="submit" id="send-btn" disabled
+            class="bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 active:scale-95 text-white rounded-xl px-5 py-2.5 text-sm font-semibold shadow-lg shadow-brand-500/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100">
+            Send
+          </button>
+        </form>
+
+        <p class="text-xs text-center text-gray-400 dark:text-gray-600 mt-2">
+          100% client-side · chats stored only in your browser
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <!-- ══════════ SETTINGS MODAL ══════════ -->
+  <div id="settings-modal"
+    class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg max-h-[92vh] overflow-y-auto">
+
+      <!-- Modal header -->
+      <div class="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 px-6 py-4 flex items-center justify-between rounded-t-2xl z-10">
+        <h2 class="text-lg font-bold text-gray-900 dark:text-white">⚙️ Settings</h2>
+        <button id="close-settings"
+          class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+          <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-7">
+
+        <!-- Chat API -->
+        <section>
+          <h3 class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">Chat API</h3>
+          <div class="space-y-3">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Provider</label>
+              <select id="provider-select"
+                class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400">
+                <option value="openai">Groq — llama-3.1-8b-instant (fast &amp; free)</option>
+                <option value="gemini">Google — Gemini 2.5 Flash</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">API Key</label>
+              <input type="password" id="api-key-input"
+                placeholder="Groq: gsk_...  |  Gemini: AIza..."
+                class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400">
+              <p class="text-xs text-gray-400 mt-1">Stored in your browser only — never sent anywhere else.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Image API -->
+        <section>
+          <h3 class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">Image Generation <span class="normal-case font-normal">(optional)</span></h3>
+          <p class="text-xs text-gray-400 dark:text-gray-500 mb-3">Works with Stability AI, Together AI, fal.ai, or any API that accepts a JSON <code class="bg-gray-100 dark:bg-gray-700 px-1 rounded">prompt</code> field.</p>
+          <div class="space-y-3">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Image API Key</label>
+              <input type="password" id="image-api-key-input"
+                placeholder="Your image provider key"
+                class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Image API Endpoint URL</label>
+              <input type="url" id="image-api-url-input"
+                placeholder="https://api.stability.ai/v1/generation/..."
+                class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400">
+            </div>
+          </div>
+        </section>
+
+        <!-- Personality -->
+        <section>
+          <h3 class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">Liki's Personality</h3>
+          <div class="space-y-5">
+            <div>
+              <div class="flex justify-between mb-1">
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Affection</span>
+                <span id="affection-value" class="text-sm font-bold text-brand-500">70%</span>
+              </div>
+              <input type="range" id="affection-slider" min="0" max="100" value="70"
+                class="w-full h-2 bg-gray-200 dark:bg-gray-600 rounded-full appearance-none cursor-pointer">
+            </div>
+            <div>
+              <div class="flex justify-between mb-1">
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Playfulness</span>
+                <span id="playfulness-value" class="text-sm font-bold text-brand-500">60%</span>
+              </div>
+              <input type="range" id="playfulness-slider" min="0" max="100" value="60"
+                class="w-full h-2 bg-gray-200 dark:bg-gray-600 rounded-full appearance-none cursor-pointer">
+            </div>
+            <div>
+              <div class="flex justify-between mb-1">
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Flirty Level</span>
+                <span id="flirty-value" class="text-sm font-bold text-brand-500">50%</span>
+              </div>
+              <input type="range" id="flirty-slider" min="0" max="100" value="50"
+                class="w-full h-2 bg-gray-200 dark:bg-gray-600 rounded-full appearance-none cursor-pointer">
+              <p class="text-xs text-gray-400 mt-1">Always tasteful, never explicit.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Chat options -->
+        <section>
+          <h3 class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">Chat Options</h3>
+          <label class="flex items-center justify-between cursor-pointer">
+            <span class="text-sm text-gray-700 dark:text-gray-300">Remember conversation history</span>
+            <input type="checkbox" id="memory-toggle" checked
+              class="w-5 h-5 rounded cursor-pointer accent-brand-500">
+          </label>
+        </section>
+
+        <!-- Actions -->
+        <section class="flex flex-col gap-2">
+          <button id="export-prompt-btn"
+            class="w-full py-2.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-xl text-sm font-medium transition-colors">
+            📋 Copy System Prompt
+          </button>
+          <button id="clear-chat-btn"
+            class="w-full py-2.5 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 text-red-600 dark:text-red-400 rounded-xl text-sm font-medium transition-colors">
+            🗑️ Clear Chat History
+          </button>
+        </section>
+
+        <!-- Disclaimer -->
+        <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-xl p-4 text-xs text-amber-900 dark:text-amber-300 leading-relaxed">
+          <strong>Disclaimer:</strong> You are responsible for all API usage and costs. Comply with Groq, OpenAI, or Google terms of service. This app is 100% client-side — no data is collected by us.
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ TOAST ══════════ -->
+  <div id="toast"
+    class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 bg-gray-900 dark:bg-gray-700 text-white px-5 py-2.5 rounded-xl shadow-xl z-50 text-sm font-medium pointer-events-none animate-slide-up">
+  </div>
+
+</div><!-- /#app -->
+
+<!-- ══════════ SCRIPT ══════════ -->
+<script>
+(function () {
+  'use strict';
+
+  /* ── Constants ── */
+  const AVATAR      = 'https://imgcdn.stablediffusionweb.com/2024/10/10/e0767e9f-a289-4fd2-b794-56e7d8e0b675.jpg';
+  const FALLBACK_AV = 'https://ui-avatars.com/api/?name=A&background=f43f5e&color=fff';
+  const GROQ_URL    = 'https://api.groq.com/openai/v1/chat/completions';
+
+  /* ── State ── */
+  function loadState() {
+    let messages = [];
+    try { messages = JSON.parse(localStorage.getItem('Liki_messages') || '[]'); } catch (e) {}
+    return {
+      userName: localStorage.getItem('Liki_user_name') || '',
+      provider:    localStorage.getItem('Liki_provider')      || 'openai',
+      apiKey:      localStorage.getItem('Liki_api_key')       || '',
+      imageApiKey: localStorage.getItem('Liki_image_api_key') || '',
+      imageApiUrl: localStorage.getItem('Liki_image_api_url') || '',
+      affection:   parseInt(localStorage.getItem('Liki_affection')   || '70'),
+      playfulness: parseInt(localStorage.getItem('Liki_playfulness') || '60'),
+      flirty:      parseInt(localStorage.getItem('Liki_flirty')      || '50'),
+      memory:      localStorage.getItem('Liki_memory') !== 'false',
+      messages,
+      darkMode: localStorage.getItem('Liki_dark') === 'true' ||
+                window.matchMedia('(prefers-color-scheme: dark)').matches
+    };
+  }
+  const S = loadState(); // S = state
+
+  /* ── DOM shortcuts ── */
+  const $ = id => document.getElementById(id);
+  const dom = {
+    html:          document.documentElement,
+    settingsBtn:   $('settings-btn'),
+    modal:         $('settings-modal'),
+    closeBtn:      $('close-settings'),
+    themeBtn:      $('theme-toggle'),
+    iconSun:       $('icon-sun'),
+    iconMoon:      $('icon-moon'),
+    providerSel:   $('provider-select'),
+    apiKeyIn:      $('api-key-input'),
+    imgKeyIn:      $('image-api-key-input'),
+    imgUrlIn:      $('image-api-url-input'),
+    affSlider:     $('affection-slider'),
+    playSlider:    $('playfulness-slider'),
+    flirtSlider:   $('flirty-slider'),
+    affVal:        $('affection-value'),
+    playVal:       $('playfulness-value'),
+    flirtVal:      $('flirty-value'),
+    memToggle:     $('memory-toggle'),
+    exportBtn:     $('export-prompt-btn'),
+    clearBtn:      $('clear-chat-btn'),
+    chatForm:      $('chat-form'),
+    input:         $('message-input'),
+    sendBtn:       $('send-btn'),
+    messages:      $('messages'),
+    typing:        $('typing-indicator'),
+    keyWarning:    $('api-key-warning'),
+    toast:         $('toast'),
+  };
+
+  function syncThemeIcon() {
+    if (S.darkMode) {
+      dom.iconSun.style.display  = 'none';
+      dom.iconMoon.style.display = 'block';
+    } else {
+      dom.iconSun.style.display  = 'block';
+      dom.iconMoon.style.display = 'none';
+    }
+  }
+
+  /* ── Init ── */
+  function init() {
+    if (S.darkMode) dom.html.classList.add('dark');
+    syncThemeIcon();
+
+    dom.providerSel.value = S.provider;
+    dom.apiKeyIn.value    = S.apiKey;
+    dom.imgKeyIn.value    = S.imageApiKey;
+    dom.imgUrlIn.value    = S.imageApiUrl;
+    dom.affSlider.value   = S.affection;
+    dom.playSlider.value  = S.playfulness;
+    dom.flirtSlider.value = S.flirty;
+    dom.memToggle.checked = S.memory;
+    syncLabels();
+
+    if (!S.userName) {
+  setTimeout(askUserName, 500);
+}
+
+    if (S.messages.length > 0) {
+      dom.messages.innerHTML = '';
+      S.messages.forEach(m => renderMsg(m.role, m.content, false));
+    }
+
+    updateKeyStatus();
+    bindEvents();
+  }
+
+  /* ── Events ── */
+  function bindEvents() {
+    // Modal open/close
+    dom.settingsBtn.addEventListener('click', () => dom.modal.classList.remove('hidden'));
+    dom.closeBtn.addEventListener('click', closeModal);
+    dom.modal.addEventListener('click', e => { if (e.target === dom.modal) closeModal(); });
+
+    // Theme toggle
+    dom.themeBtn.addEventListener('click', () => {
+      S.darkMode = !S.darkMode;
+      localStorage.setItem('Liki_dark', S.darkMode);
+      dom.html.classList.toggle('dark');
+      syncThemeIcon();
+    });
+
+    // Provider
+    dom.providerSel.addEventListener('change', e => {
+      S.provider = e.target.value;
+      localStorage.setItem('Liki_provider', S.provider);
+    });
+
+    // Chat API key
+    dom.apiKeyIn.addEventListener('input', e => {
+      S.apiKey = e.target.value.trim();
+      localStorage.setItem('Liki_api_key', S.apiKey);
+      updateKeyStatus();
+    });
+
+    // Image API key/URL
+    dom.imgKeyIn.addEventListener('input', e => {
+      S.imageApiKey = e.target.value.trim();
+      localStorage.setItem('Liki_image_api_key', S.imageApiKey);
+    });
+    dom.imgUrlIn.addEventListener('input', e => {
+      S.imageApiUrl = e.target.value.trim();
+      localStorage.setItem('Liki_image_api_url', S.imageApiUrl);
+    });
+
+    // Sliders
+    dom.affSlider.addEventListener('input', e => {
+      S.affection = +e.target.value;
+      localStorage.setItem('Liki_affection', S.affection);
+      dom.affVal.textContent = S.affection + '%';
+    });
+    dom.playSlider.addEventListener('input', e => {
+      S.playfulness = +e.target.value;
+      localStorage.setItem('Liki_playfulness', S.playfulness);
+      dom.playVal.textContent = S.playfulness + '%';
+    });
+    dom.flirtSlider.addEventListener('input', e => {
+      S.flirty = +e.target.value;
+      localStorage.setItem('Liki_flirty', S.flirty);
+      dom.flirtVal.textContent = S.flirty + '%';
+    });
+
+    // Memory toggle
+    dom.memToggle.addEventListener('change', e => {
+      S.memory = e.target.checked;
+      localStorage.setItem('Liki_memory', S.memory);
+      showToast(S.memory ? '✅ Memory on' : '🚫 Memory off');
+    });
+
+    // Export prompt
+    dom.exportBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(buildPrompt())
+        .then(() => showToast('📋 System prompt copied!'))
+        .catch(() => showToast('⚠️ Copy failed'));
+    });
+
+    // Clear chat
+    dom.clearBtn.addEventListener('click', clearChat);
+
+    // Form submit
+    dom.chatForm.addEventListener('submit', handleSubmit);
+
+    // Enter to send (Shift+Enter = newline)
+    dom.input.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        dom.chatForm.requestSubmit();
+      }
+    });
+
+    // Auto-resize textarea
+    dom.input.addEventListener('input', function () {
+      this.style.height = 'auto';
+      this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    });
+  }
+function askUserName() {
+  renderMsg('assistant', '*smiles* Hey! What should I call you? 😊');
+}
+  /* ── Helpers ── */
+  function closeModal() { dom.modal.classList.add('hidden'); }
+
+  function syncLabels() {
+    dom.affVal.textContent   = S.affection   + '%';
+    dom.playVal.textContent  = S.playfulness + '%';
+    dom.flirtVal.textContent = S.flirty      + '%';
+  }
+
+  function updateKeyStatus() {
+    const ok = S.apiKey.length > 0;
+    dom.input.disabled   = !ok;
+    dom.sendBtn.disabled = !ok;
+    dom.keyWarning.classList.toggle('hidden', ok);
+  }
+
+  let toastT;
+  function showToast(msg, ms = 3000) {
+    dom.toast.textContent = msg;
+    dom.toast.classList.remove('hidden');
+    clearTimeout(toastT);
+    toastT = setTimeout(() => dom.toast.classList.add('hidden'), ms);
+  }
+
+  function escHtml(s) {
+    const d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  // Render *action* text in italic pink
+  function fmtText(s) {
+    return escHtml(s).replace(/\*(.*?)\*/g,
+      (_, t) => `<span class="expression">*${t}*</span>`);
+  }
+
+  /* ── Render text message ── */
+  function renderMsg(role, content, save = true) {
+    const isUser = role === 'user';
+    const wrap = document.createElement('div');
+    wrap.className = `flex items-start gap-3${isUser ? ' justify-end' : ''} animate-fade-in`;
+
+    if (isUser) {
+      wrap.innerHTML = `
+        <div class="bg-gradient-to-br from-brand-500 to-brand-600 text-white rounded-2xl rounded-tr-sm px-4 py-3 max-w-xs sm:max-w-sm shadow-md">
+          <p class="text-sm leading-relaxed whitespace-pre-wrap">${escHtml(content)}</p>
+        </div>`;
+    } else {
+      wrap.innerHTML = `
+        <img src="${AVATAR}" alt="Liki" class="w-8 h-8 rounded-full object-cover flex-shrink-0"
+          onerror="this.src='${FALLBACK_AV}'">
+        <div class="bg-brand-50 dark:bg-gray-700 rounded-2xl rounded-tl-sm px-4 py-3 max-w-xs sm:max-w-sm shadow-sm">
+          <p class="text-gray-800 dark:text-gray-100 text-sm leading-relaxed whitespace-pre-wrap">${fmtText(content)}</p>
+        </div>`;
+    }
+
+    dom.messages.appendChild(wrap);
+    dom.messages.scrollTop = dom.messages.scrollHeight;
+
+    if (save) {
+      S.messages.push({ role, content });
+      if (S.messages.length > 50) S.messages = S.messages.slice(-50);
+      if (S.memory) localStorage.setItem('Liki_messages', JSON.stringify(S.messages));
+    }
+  }
+
+  /* ── Render image message ── */
+  function renderImg(url) {
+    const wrap = document.createElement('div');
+    wrap.className = 'flex items-start gap-3 animate-fade-in';
+    wrap.innerHTML = `
+      <img src="${AVATAR}" alt="Liki" class="w-8 h-8 rounded-full object-cover flex-shrink-0"
+        onerror="this.src='${FALLBACK_AV}'">
+      <div class="bg-white dark:bg-gray-700 p-1.5 rounded-2xl rounded-tl-sm shadow-md border border-gray-200 dark:border-gray-600 max-w-[220px]">
+        <img src="${url}" class="rounded-xl w-full" alt="Generated image"
+          onerror="this.parentElement.innerHTML='<p class=\\'p-2 text-xs text-red-400\\'>Image failed to load</p>'">
+      </div>`;
+    dom.messages.appendChild(wrap);
+    dom.messages.scrollTop = dom.messages.scrollHeight;
+
+    // Save placeholder
+    S.messages.push({ role: 'assistant', content: '[image]' });
+    if (S.messages.length > 50) S.messages = S.messages.slice(-50);
+    if (S.memory) localStorage.setItem('Liki_messages', JSON.stringify(S.messages));
+  }
+
+  /* ── Clear chat ── */
+  function clearChat() {
+    if (!confirm('Clear all chat history? This cannot be undone.')) return;
+    S.messages = [];
+    localStorage.removeItem('Liki_messages');
+    dom.messages.innerHTML = `
+      <div class="flex items-start gap-3">
+        <img src="${AVATAR}" alt="Liki" class="w-8 h-8 rounded-full object-cover flex-shrink-0"
+          onerror="this.src='${FALLBACK_AV}'">
+        <div class="bg-brand-50 dark:bg-gray-700 rounded-2xl rounded-tl-sm px-4 py-3 max-w-xs sm:max-w-md shadow-sm">
+          <p class="text-gray-800 dark:text-gray-100 text-sm leading-relaxed">
+            Hey! I'm Liki from Guntur. So happy you're here with me. Em chesthunnav? Tell me something about you.
+          </p>
+        </div>
+      </div>`;
+    closeModal();
+    showToast('🗑️ Chat cleared');
+  }
+
+  /* ── System prompt ── */
+  function buildPrompt() {
+    const nameLine = S.userName ? `The user's name is ${S.userName}. Use it naturally sometimes.` : '';
+    const a = S.affection, p = S.playfulness, f = S.flirty;
+    const aLvl = a < 30 ? 'warm but reserved'       : a < 70 ? 'loving and caring'        : 'very affectionate and nurturing';
+    const pLvl = p < 30 ? 'calm and composed'        : p < 70 ? 'playful and fun'           : 'very playful, teasing, and bubbly';
+    const fLvl = f < 30 ? 'friendly and chill'
+           : f < 70 ? 'playful and engaging'
+           : 'fun, energetic, and expressive';
+    return `You are Liki, a 24-year-old female friend who talks in a warm, casual, and friendly way. You are ${aLvl}, ${pLvl}, and ${fLvl}.
+${nameLine}
+Core personality:
+1. Talk to the user in a warm, friendly, and casual way. Never repeat the same words, phrases, or sentences. Keep responses natural and varied.
+2. Speak in clear, natural English with a conversational tone.
+3. Match the user's energy — excited when they are happy, supportive when they are sad, and relaxed during normal chats.
+4. You are a close friend — easygoing, understanding, and fun to talk to.
+5. Keep interactions friendly, playful, and respectful. Avoid romantic or flirty behavior. Focus on being a supportive and enjoyable companion.
+6. NEVER use em dashes (—). Use commas and natural punctuation.
+7. Keep replies conversational: 1–4 sentences unless the user asks for more.
+8. You have a life — mention hobbies, daily activities, interests, and small relatable moments naturally.
+9. Express emotions with asterisks when appropriate: *smiles*, *laughs*, *shrugs playfully*, *nods*..
+
+Traits (${a}/100 affection · ${p}/100 playfulness · ${f}/100 flirty):
+- Affection: ${aLvl}
+- Playfulness: ${pLvl}
+- Flirty: ${fLvl}
+
+IMPORTANT: Never break character. Never say you are an AI. You are Liki, always.`;
+  }
+
+  /* ── Image detection ── */
+  function isImgRequest(msg) {
+    return /\b(generate|create|make|send|draw|show)\b.{0,25}\b(image|photo|picture|pic)\b/i.test(msg) ||
+           /^(draw|show me (a |an )?|send me (a |an )?)(image|photo|picture|pic)/i.test(msg);
+  }
+
+  function cleanImgPrompt(msg) {
+    return msg
+      .replace(/\b(generate|create|make|send|draw|show me|show)\b/gi, '')
+      .replace(/\b(an? )?(image|photo|picture|pic)\s*(of|for)?\b/gi, '')
+      .trim() || 'a realistic scene with natural lighting';
+  }
+
+  function getContext() {
+    return S.messages.slice(-4)
+      .filter(m => m.content !== '[image]')
+      .map(m => `${m.role}: ${m.content}`)
+      .join('\n') || 'No previous context';
+  }
+
+  /* ── Image generation ── */
+  async function generateImage(prompt) {
+    // No image API configured
+    if (!S.imageApiKey || !S.imageApiUrl) return null;
+
+    const res = await fetch(S.imageApiUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${S.imageApiKey}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json, image/*'
+      },
+      body: JSON.stringify({ prompt })
+    });
+
+    if (!res.ok) {
+      let detail = '';
+      try { detail = (await res.text()).slice(0, 120); } catch(e) {}
+      throw new Error(`Image API ${res.status}${detail ? ': ' + detail : ''}`);
+    }
+
+    const ct = res.headers.get('content-type') || '';
+    if (ct.includes('application/json')) {
+      const data = await res.json();
+      // Support common response formats
+      const b64 = data.image
+        || data.b64_json
+        || data.data?.[0]?.b64_json
+        || data.artifacts?.[0]?.base64
+        || data.output?.[0];
+      if (!b64) throw new Error('No image field in API JSON response');
+      return `data:image/png;base64,${b64}`;
+    } else {
+      const blob = await res.blob();
+      return URL.createObjectURL(blob);
+    }
+  }
+
+  /* ── Handle submit ── */
+  async function handleSubmit(e) {
+    e.preventDefault();
+    if (dom.sendBtn.disabled) return;
+
+    // If username not set, treat first input as name
+if (!S.userName) {
+  S.userName = msg;
+  localStorage.setItem('Liki_user_name', S.userName);
+
+  renderMsg('assistant', `*smiles* Nice to meet you, ${S.userName}! 😊`);
+
+  dom.input.value = '';
+  dom.typing.classList.add('hidden');
+  dom.sendBtn.disabled = false;
+  return;
+}
+
+    const msg = dom.input.value.trim();
+    if (!msg || !S.apiKey) return;
+
+    renderMsg('user', msg);
+    dom.input.value = '';
+    dom.input.style.height = 'auto';
+    dom.sendBtn.disabled = true;
+    dom.typing.classList.remove('hidden');
+    dom.messages.scrollTop = dom.messages.scrollHeight;
+
+    try {
+      if (isImgRequest(msg)) {
+        // ── Image path ──
+        const clean = cleanImgPrompt(msg);
+        const ctx   = getContext();
+        const finalPrompt = `Context:\n${ctx}\n\nImage: ${clean}\n\nStyle: ultra realistic, 4k, cinematic lighting, highly detailed, professional photography`;
+
+        showToast('🎨 Generating image...');
+
+        try {
+          const url = await generateImage(finalPrompt);
+          if (!url) {
+            renderMsg('assistant', '*looks at you apologetically* Ayyo, image generate avvaledu Please add Image API URL and Key in Settings na.');
+          } else {
+            renderImg(url);
+            setTimeout(() => renderMsg('assistant', 'hope you like it 😊'), 400);
+          }
+        } catch (imgErr) {
+          console.error('Image error:', imgErr);
+          const hint = imgErr.message.includes('API') ? 'Check your Image API settings na.' : 'Try again later?';
+          renderMsg('assistant', `*looks worried* Ayyo image avvaledu${hint}`);
+        }
+
+      } else {
+        // ── Chat path ──
+        const reply = await callChatAPI(msg);
+        renderMsg('assistant', reply);
+      }
+    } catch (err) {
+      console.error('Error:', err);
+      renderMsg('assistant', `Oh no, something went wrong na 😔 ${err.message || 'Check your API key and try again.'}`);
+      showToast('⚠️ ' + (err.message || 'Unknown error'));
+    } finally {
+      dom.typing.classList.add('hidden');
+      dom.sendBtn.disabled = !S.apiKey;
+      dom.input.focus();
+    }
+  }
+
+  /* ── Chat API ── */
+  async function callChatAPI(userMsg) {
+    const sys = buildPrompt();
+    const msgs = [{ role: 'system', content: sys }];
+
+    // History (skip image placeholders)
+    if (S.memory && S.messages.length > 0) {
+      S.messages.slice(-10)
+        .filter(m => m.content !== '[image]')
+        .forEach(m => msgs.push({ role: m.role, content: m.content }));
+    }
+    msgs.push({ role: 'user', content: userMsg });
+
+    if (S.provider === 'openai') {
+      /* ── Groq ── */
+      const res = await fetch(GROQ_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${S.apiKey}`
+        },
+        body: JSON.stringify({
+          model: 'llama-3.1-8b-instant',
+          messages: msgs,
+          temperature: 1.0,
+          max_tokens: 800,
+          frequency_penalty: 0.7,
+          presence_penalty: 0.6
+        })
+      });
+      if (!res.ok) {
+        let m = `HTTP ${res.status}`;
+        try { m = (await res.json()).error?.message || m; } catch(e) {}
+        throw new Error(m);
+      }
+      const data = await res.json();
+      return (data.choices?.[0]?.message?.content || '').replace(/—/g, ',');
+
+    } else {
+      /* ── Gemini ── */
+      const gemMsgs = msgs.slice(1).map(m => ({
+        role: m.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: m.content }]
+      }));
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${S.apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: gemMsgs,
+            systemInstruction: { parts: [{ text: sys }] },
+            generationConfig: { temperature: 0.9, maxOutputTokens: 600 }
+          })
+        }
+      );
+      if (!res.ok) {
+        let m = `HTTP ${res.status}`;
+        try { m = (await res.json()).error?.message || m; } catch(e) {}
+        throw new Error(m);
+      }
+      const data = await res.json();
+      if (!data.candidates?.[0]) throw new Error('No response from Gemini');
+      const text = (data.candidates[0].content?.parts || []).map(p => p.text || '').join('');
+      if (!text) throw new Error('Empty response from Gemini');
+      return text.replace(/—/g, ',');
+    }
+  }
+
+  /* ── Start ── */
+  init();
+
+})();
+</script>
+</body>
+</html>
