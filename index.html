@@ -2,188 +2,691 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Liki</title>
-
-<script src="https://cdn.tailwindcss.com"></script>
-<!-- Tailwind config MUST come immediately after the CDN script -->
-<script>
-  tailwind.config = {
-    darkMode: 'class',
-    theme: {
-      extend: {
-        colors: {
-          brand: {
-            50: '#fff1f2', 100: '#ffe4e6', 200: '#fecdd3', 300: '#fda4af',
-            400: '#fb7185', 500: '#f43f5e', 600: '#e11d48', 700: '#be123c',
-            800: '#9f1239', 900: '#881337'
-          }
-        },
-        animation: {
-          'pulse-dot': 'pulse-dot 1.4s infinite ease-in-out',
-          'slide-up':  'slide-up 0.3s ease-out',
-          'fade-in':   'fade-in 0.3s ease-out'
-        },
-        keyframes: {
-          'pulse-dot': {
-            '0%, 80%, 100%': { opacity: '0.3', transform: 'scale(0.8)' },
-            '40%': { opacity: '1', transform: 'scale(1)' }
-          },
-          'slide-up': {
-            '0%':   { transform: 'translateY(20px)', opacity: '0' },
-            '100%': { transform: 'translateY(0)',    opacity: '1' }
-          },
-          'fade-in': {
-            '0%':   { opacity: '0' },
-            '100%': { opacity: '1' }
-          }
-        }
-      }
-    }
-  };
-</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
-*, *::before, *::after { box-sizing: border-box; font-family: 'Inter', sans-serif; }
-html, body { height: 100%; margin: 0; padding: 0; }
-
-/* ── Dark mode CSS fallback (ensures toggle works even before Tailwind JIT) ── */
-html.dark body                    { background-color: #111827; color: #f9fafb; }
-html.dark header                  { background-color: #1f2937; border-color: #374151; }
-html.dark #chat-wrap              { background-color: #1f2937; border-color: #374151; }
-html.dark #messages               { background-color: #1f2937; }
-html.dark #settings-modal > div  { background-color: #1f2937; }
-html.dark .bg-white               { background-color: #1f2937; }
-html.dark .bg-gray-50             { background-color: #111827; }
-html.dark .bg-gray-100            { background-color: #374151; }
-html.dark .bg-gray-700            { background-color: #374151; }
-html.dark .bg-gray-800            { background-color: #1f2937; }
-html.dark .border-gray-200        { border-color: #374151; }
-html.dark .border-gray-700        { border-color: #374151; }
-html.dark .text-gray-900          { color: #f9fafb; }
-html.dark .text-gray-800          { color: #f3f4f6; }
-html.dark .text-gray-700          { color: #d1d5db; }
-html.dark .text-gray-600          { color: #9ca3af; }
-html.dark .text-gray-500          { color: #6b7280; }
-html.dark .text-gray-400          { color: #9ca3af; }
-html.dark .text-gray-300          { color: #d1d5db; }
-html.dark input, html.dark textarea, html.dark select {
-  background-color: #374151;
-  border-color: #4b5563;
-  color: #f9fafb;
-}
-html.dark .hover\:bg-gray-100:hover { background-color: #374151; }
-html.dark .hover\:bg-gray-700:hover { background-color: #374151; }
-html.dark .bg-brand-50            { background-color: #374151; }
-html.dark .from-brand-50          { --tw-gradient-from: #374151; }
-html.dark .to-brand-100           { --tw-gradient-to: #4b5563; }
-html.dark .from-gray-700          { --tw-gradient-from: #374151; }
-html.dark .to-gray-600            { --tw-gradient-to: #4b5563; }
-html.dark .bg-gray-800\/80        { background-color: rgba(31,41,55,0.8); }
-.chat-scroll::-webkit-scrollbar { width: 5px; }
-.chat-scroll::-webkit-scrollbar-track { background: transparent; }
-.chat-scroll::-webkit-scrollbar-thumb { background: rgba(244,63,94,0.3); border-radius: 99px; }
-.dark .chat-scroll::-webkit-scrollbar-thumb { background: rgba(244,63,94,0.45); }
-
-/* Typing animation delays */
-.typing-dot:nth-child(1) { animation-delay: 0s; }
-.typing-dot:nth-child(2) { animation-delay: 0.2s; }
-.typing-dot:nth-child(3) { animation-delay: 0.4s; }
-
-/* Range slider thumb */
-input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 18px; height: 18px; border-radius: 50%;
-  background: #f43f5e; cursor: pointer;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.25);
-}
-input[type="range"]::-moz-range-thumb {
-  width: 18px; height: 18px; border-radius: 50%;
-  background: #f43f5e; cursor: pointer; border: none;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+/* ══════════ RESET & BASE ══════════ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'DM Sans', sans-serif;
 }
 
-/* *action* text styling */
-.expression { font-style: italic; color: #fb7185; }
+:root {
+  --brand-400: #fb7185;
+  --brand-500: #f43f5e;
+  --brand-600: #e11d48;
+  --brand-700: #be123c;
 
-/* Full-height layout */
-#app { display: flex; flex-direction: column; min-height: 100vh; }
-main  { flex: 1; display: flex; flex-direction: column; }
-/* Mobile (default) */
+  --bg-app:    #f1f5f9;
+  --bg-header: #ffffff;
+  --bg-chat:   #ffffff;
+  --bg-input:  #f8fafc;
+  --bg-msg-ai: #fff0f3;
+  --bg-msg-user: linear-gradient(135deg, #f43f5e, #e11d48);
+
+  --border:    #e2e8f0;
+  --text-primary:   #0f172a;
+  --text-secondary: #64748b;
+  --text-muted:     #94a3b8;
+  --text-ai-msg:    #1e293b;
+  --text-user-msg:  #ffffff;
+
+  --shadow-sm:  0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md:  0 4px 16px rgba(0,0,0,0.10);
+  --shadow-lg:  0 8px 32px rgba(0,0,0,0.14);
+
+  --radius-chat: 18px;
+  --radius-sm:   10px;
+  --radius-lg:   16px;
+  --radius-xl:   24px;
+}
+
+html.dark {
+  --bg-app:    #0d1117;
+  --bg-header: #161b22;
+  --bg-chat:   #161b22;
+  --bg-input:  #0d1117;
+  --bg-msg-ai: #1e2532;
+  --bg-msg-user: linear-gradient(135deg, #f43f5e, #be123c);
+
+  --border:    #30363d;
+  --text-primary:   #e6edf3;
+  --text-secondary: #8b949e;
+  --text-muted:     #6e7681;
+  --text-ai-msg:    #e6edf3;
+  --text-user-msg:  #ffffff;
+
+  --shadow-sm:  0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md:  0 4px 16px rgba(0,0,0,0.4);
+  --shadow-lg:  0 8px 32px rgba(0,0,0,0.5);
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg-app);
+  color: var(--text-primary);
+  transition: background 0.3s, color 0.3s;
+}
+
+/* ══════════ APP SHELL ══════════ */
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  height: 100vh; /* fallback */
+  overflow: hidden;
+}
+
+/* ══════════ HEADER ══════════ */
+header {
+  flex-shrink: 0;
+  background: var(--bg-header);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  z-index: 40;
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.avatar-wrap img {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--brand-400);
+  display: block;
+}
+
+.online-dot {
+  position: absolute;
+  bottom: 1px;
+  right: 1px;
+  width: 11px;
+  height: 11px;
+  background: #22c55e;
+  border: 2px solid var(--bg-header);
+  border-radius: 50%;
+}
+
+.header-name {
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.header-status {
+  font-size: 11px;
+  color: #22c55e;
+  font-weight: 500;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.icon-btn:hover {
+  background: var(--bg-input);
+  color: var(--text-primary);
+}
+
+.icon-btn svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+/* ══════════ MAIN / CHAT AREA ══════════ */
+main {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* desktop: add padding so the chat card floats */
+@media (min-width: 768px) {
+  main {
+    padding: 24px 16px;
+    background: var(--bg-app);
+  }
+}
+
 #chat-wrap {
-  height: calc(100dvh - 76px);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-chat);
+  overflow: hidden;
+  /* mobile: full-width, no radius */
   width: 100%;
   border-radius: 0;
 }
 
-/* Desktop */
 @media (min-width: 768px) {
   #chat-wrap {
-    height: 80vh;
-    max-width: 900px;
+    max-width: 820px;
+    width: 100%;
     margin: 0 auto;
-    border-radius: 16px;
-  }
-
-  main {
-    padding-top: 20px;
-    padding-bottom: 20px;
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-lg);
   }
 }
-  @media (min-width: 768px) {
-  body {
-    background: linear-gradient(to bottom right, #f9fafb, #e5e7eb);
-  }
 
-  html.dark body {
-    background: linear-gradient(to bottom right, #111827, #1f2937);
+/* ══════════ MESSAGES ══════════ */
+#messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  scroll-behavior: smooth;
+}
+
+#messages::-webkit-scrollbar { width: 4px; }
+#messages::-webkit-scrollbar-track { background: transparent; }
+#messages::-webkit-scrollbar-thumb { background: rgba(244,63,94,0.25); border-radius: 99px; }
+
+@media (min-width: 768px) {
+  #messages {
+    padding: 24px 28px;
+    gap: 16px;
   }
 }
-#messages  { flex: 1; overflow-y: auto; }
+
+/* ── Message rows ── */
+.msg-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  animation: fadeUp 0.25s ease-out both;
+}
+
+.msg-row.user {
+  flex-direction: row-reverse;
+}
+
+.msg-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  align-self: flex-end;
+}
+
+.msg-bubble {
+  max-width: min(72%, 380px);
+  padding: 10px 14px;
+  border-radius: var(--radius-chat);
+  font-size: 14px;
+  line-height: 1.6;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+/* AI bubble */
+.msg-row:not(.user) .msg-bubble {
+  background: var(--bg-msg-ai);
+  color: var(--text-ai-msg);
+  border-bottom-left-radius: 4px;
+  box-shadow: var(--shadow-sm);
+}
+
+/* User bubble */
+.msg-row.user .msg-bubble {
+  background: var(--bg-msg-user);
+  color: var(--text-user-msg);
+  border-bottom-right-radius: 4px;
+  box-shadow: 0 2px 8px rgba(244,63,94,0.30);
+}
+
+.expression {
+  font-style: italic;
+  color: var(--brand-400);
+}
+
+/* image bubble */
+.msg-img-wrap {
+  background: var(--bg-chat);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-chat);
+  border-bottom-left-radius: 4px;
+  overflow: hidden;
+  max-width: 220px;
+  box-shadow: var(--shadow-sm);
+}
+
+.msg-img-wrap img {
+  display: block;
+  width: 100%;
+  border-radius: inherit;
+}
+
+/* ── Typing indicator ── */
+#typing-indicator {
+  display: none;
+  padding: 0 16px 12px;
+}
+
+#typing-indicator.visible {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.typing-bubble {
+  background: var(--bg-msg-ai);
+  border-radius: var(--radius-chat);
+  border-bottom-left-radius: 4px;
+  padding: 12px 16px;
+  display: flex;
+  gap: 5px;
+  box-shadow: var(--shadow-sm);
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  background: var(--text-muted);
+  border-radius: 50%;
+  animation: dotPulse 1.4s infinite ease-in-out;
+}
+.dot:nth-child(2) { animation-delay: 0.2s; }
+.dot:nth-child(3) { animation-delay: 0.4s; }
+
+/* ══════════ INPUT BAR ══════════ */
+#input-bar {
+  flex-shrink: 0;
+  background: var(--bg-input);
+  border-top: 1px solid var(--border);
+  padding: 12px 16px;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 768px) {
+  #input-bar { padding: 14px 20px; }
+}
+
+#api-key-warning {
+  display: none;
+  margin-bottom: 10px;
+  padding: 8px 12px;
+  background: rgba(251,191,36,0.12);
+  border: 1px solid rgba(251,191,36,0.35);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  color: #92400e;
+}
+
+html.dark #api-key-warning { color: #fcd34d; }
+
+#api-key-warning.visible { display: block; }
+
+.input-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+#message-input {
+  flex: 1;
+  resize: none;
+  background: var(--bg-chat);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  color: var(--text-primary);
+  font-size: 14px;
+  padding: 10px 14px;
+  line-height: 1.5;
+  outline: none;
+  max-height: 120px;
+  transition: border-color 0.2s;
+  display: block;
+}
+
+#message-input::placeholder { color: var(--text-muted); }
+
+#message-input:focus {
+  border-color: var(--brand-400);
+  box-shadow: 0 0 0 3px rgba(244,63,94,0.10);
+}
+
+#message-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#send-btn {
+  flex-shrink: 0;
+  background: linear-gradient(135deg, var(--brand-500), var(--brand-700));
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s, box-shadow 0.2s;
+  box-shadow: 0 3px 12px rgba(244,63,94,0.35);
+  white-space: nowrap;
+}
+
+#send-btn:hover:not(:disabled) {
+  opacity: 0.92;
+  box-shadow: 0 4px 18px rgba(244,63,94,0.45);
+}
+
+#send-btn:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+#send-btn:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.input-footer {
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 7px;
+}
+
+/* ══════════ SETTINGS MODAL ══════════ */
+#settings-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+#settings-modal.open {
+  display: flex;
+}
+
+.settings-card {
+  background: var(--bg-header);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 500px;
+  max-height: 90dvh;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.settings-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.settings-head h2 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.settings-body {
+  overflow-y: auto;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.settings-section h3 {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+}
+
+.field-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.field-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.settings-input {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-chat);
+  color: var(--text-primary);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.settings-input:focus {
+  border-color: var(--brand-400);
+  box-shadow: 0 0 0 3px rgba(244,63,94,0.10);
+}
+
+.settings-input::placeholder { color: var(--text-muted); }
+
+.spacer { margin-top: 8px; }
+
+/* Sliders */
+.slider-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.slider-label { font-size: 13px; font-weight: 500; color: var(--text-secondary); }
+.slider-val   { font-size: 13px; font-weight: 700; color: var(--brand-500); }
+
+input[type="range"] {
+  width: 100%;
+  height: 6px;
+  border-radius: 99px;
+  background: var(--border);
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--brand-500);
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--brand-500);
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+}
+
+/* Memory toggle */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.toggle-row span { font-size: 13px; color: var(--text-secondary); }
+
+/* Action buttons in settings */
+.settings-btn {
+  width: 100%;
+  padding: 11px;
+  border-radius: var(--radius-sm);
+  border: none;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  text-align: center;
+}
+
+.settings-btn.neutral {
+  background: var(--bg-input);
+  color: var(--text-primary);
+}
+.settings-btn.neutral:hover { filter: brightness(0.95); }
+
+.settings-btn.danger {
+  background: rgba(239,68,68,0.1);
+  color: #ef4444;
+}
+.settings-btn.danger:hover { background: rgba(239,68,68,0.18); }
+
+.disclaimer {
+  padding: 12px 14px;
+  background: rgba(251,191,36,0.10);
+  border: 1px solid rgba(251,191,36,0.3);
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  color: #92400e;
+  line-height: 1.6;
+}
+
+html.dark .disclaimer { color: #fcd34d; }
+
+/* ══════════ TOAST ══════════ */
+#toast {
+  display: none;
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #0f172a;
+  color: #fff;
+  padding: 9px 18px;
+  border-radius: 99px;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: var(--shadow-md);
+  z-index: 200;
+  pointer-events: none;
+  white-space: nowrap;
+  animation: fadeUp 0.2s ease-out both;
+}
+
+html.dark #toast { background: #1e293b; }
+
+#toast.visible { display: block; }
+
+/* ══════════ ANIMATIONS ══════════ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes dotPulse {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+  40%           { opacity: 1;   transform: scale(1); }
+}
 </style>
 </head>
 
-<body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+<body>
 <div id="app">
 
   <!-- ══════════ HEADER ══════════ -->
-  <header class="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-40 border-b border-gray-200 dark:border-gray-700">
-    <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
-
-      <div class="flex items-center gap-3">
-        <div class="relative flex-shrink-0">
-          <img src="https://tse2.mm.bing.net/th/id/OIP.fWcGapbaaDFEdyVQyWMEEwHaHa?pid=Api&P=0"
+  <header>
+    <div class="header-inner">
+      <div class="header-left">
+        <div class="avatar-wrap">
+          <img
+            src="https://tse2.mm.bing.net/th/id/OIP.fWcGapbaaDFEdyVQyWMEEwHaHa?pid=Api&P=0"
             alt="Liki"
-            class="w-11 h-11 rounded-full object-cover ring-2 ring-brand-400"
             onerror="this.src='https://ui-avatars.com/api/?name=Liki&background=f43f5e&color=fff'">
-          <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full"></span>
+          <span class="online-dot"></span>
         </div>
         <div>
-          <p class="font-semibold text-gray-900 dark:text-white leading-tight">Liki</p>
-          <p class="text-xs text-green-500 font-medium">Online</p>
+          <p class="header-name">Liki</p>
+          <p class="header-status">Online</p>
         </div>
       </div>
-
-      <div class="flex items-center gap-1">
-        <button id="settings-btn" title="Settings"
-          class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-          <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="header-right">
+        <button id="settings-btn" class="icon-btn" title="Settings" aria-label="Settings">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
           </svg>
         </button>
-        <button id="theme-toggle" title="Toggle theme"
-          class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-          <!-- Sun icon: visible in light mode -->
-          <svg id="icon-sun" class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button id="theme-btn" class="icon-btn" title="Toggle theme" aria-label="Toggle theme">
+          <svg id="icon-sun" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
           </svg>
-          <!-- Moon icon: visible in dark mode -->
-          <svg id="icon-moon" class="w-5 h-5 text-gray-400" style="display:none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg id="icon-moon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display:none">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
           </svg>
@@ -193,196 +696,151 @@ main  { flex: 1; display: flex; flex-direction: column; }
   </header>
 
   <!-- ══════════ MAIN ══════════ -->
-  <main class="w-full px-3 py-0 md:py-6">
-    <div id="chat-wrap"
-      class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+  <main>
+    <div id="chat-wrap">
 
       <!-- Messages -->
-      <div id="messages" class="chat-scroll p-4 md:p-6 space-y-4">
-        <!-- Welcome -->
-        <div class="flex items-start gap-3">
-          <img src="https://imgcdn.stablediffusionweb.com/2024/10/10/e0767e9f-a289-4fd2-b794-56e7d8e0b675.jpg"
-            alt="Liki" class="w-8 h-8 rounded-full object-cover flex-shrink-0"
-            onerror="this.src='https://ui-avatars.com/api/?name=A&background=f43f5e&color=fff'">
-          <div class="bg-brand-50 dark:bg-gray-700 rounded-2xl rounded-tl-sm px-4 py-3 max-w-xs sm:max-w-md shadow-sm">
-            <p class="text-gray-800 dark:text-gray-100 text-sm leading-relaxed">
-              Hey! I'm Liki from Guntur. Nice to meet you What are you up to?
-            </p>
-          </div>
-        </div>
+      <div id="messages">
+        <!-- Welcome message injected by JS -->
       </div>
 
       <!-- Typing indicator -->
-      <div id="typing-indicator" class="hidden px-4 pb-3">
-        <div class="flex items-center gap-3">
-          <img src="https://imgcdn.stablediffusionweb.com/2024/10/10/e0767e9f-a289-4fd2-b794-56e7d8e0b675.jpg"
-            alt="Liki" class="w-8 h-8 rounded-full object-cover flex-shrink-0"
-            onerror="this.src='https://ui-avatars.com/api/?name=A&background=f43f5e&color=fff'">
-          <div class="bg-gray-100 dark:bg-gray-700 rounded-2xl rounded-tl-sm px-4 py-3">
-            <div class="flex gap-1">
-              <div class="typing-dot w-2 h-2 bg-gray-400 rounded-full animate-pulse-dot"></div>
-              <div class="typing-dot w-2 h-2 bg-gray-400 rounded-full animate-pulse-dot"></div>
-              <div class="typing-dot w-2 h-2 bg-gray-400 rounded-full animate-pulse-dot"></div>
-            </div>
-          </div>
+      <div id="typing-indicator">
+        <img
+          src="https://imgcdn.stablediffusionweb.com/2024/10/10/e0767e9f-a289-4fd2-b794-56e7d8e0b675.jpg"
+          alt="Liki" class="msg-avatar"
+          onerror="this.src='https://ui-avatars.com/api/?name=L&background=f43f5e&color=fff'">
+        <div class="typing-bubble">
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
         </div>
       </div>
 
       <!-- Input bar -->
-      <div class="border-t border-gray-200 dark:border-gray-700 p-3 sm:p-4 bg-gray-50 dark:bg-gray-800/80">
-        <div id="api-key-warning"
-          class="hidden mb-3 px-3 py-2 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-xl text-xs text-amber-800 dark:text-amber-300">
-          ⚠️ Add your <strong>Chat API Key</strong> in Settings to start chatting.
+      <div id="input-bar">
+        <div id="api-key-warning">
+          ⚠️ Add your <strong>Chat API Key</strong> in ⚙️ Settings to start chatting.
         </div>
-
-        <form id="chat-form" class="flex items-end gap-2">
-          <textarea id="message-input" rows="1"
+        <div class="input-row">
+          <textarea
+            id="message-input"
+            rows="1"
             placeholder="Message Liki..."
             disabled
-            class="flex-1 resize-none rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 transition-all"
-            style="max-height:120px;"></textarea>
-          <button type="submit" id="send-btn" disabled
-            class="bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 active:scale-95 text-white rounded-xl px-5 py-2.5 text-sm font-semibold shadow-lg shadow-brand-500/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100">
-            Send
-          </button>
-        </form>
-
-        <p class="text-xs text-center text-gray-400 dark:text-gray-600 mt-2">
-          100% client-side · chats stored only in your browser
-        </p>
+            aria-label="Message input"></textarea>
+          <button id="send-btn" disabled>Send</button>
+        </div>
+        <p class="input-footer">100% client-side · chats stored only in your browser</p>
       </div>
-    </div>
+
+    </div><!-- /#chat-wrap -->
   </main>
 
-  <!-- ══════════ SETTINGS MODAL ══════════ -->
-  <div id="settings-modal"
-    class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg max-h-[92vh] overflow-y-auto">
+</div><!-- /#app -->
 
-      <!-- Modal header -->
-      <div class="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 px-6 py-4 flex items-center justify-between rounded-t-2xl z-10">
-        <h2 class="text-lg font-bold text-gray-900 dark:text-white">⚙️ Settings</h2>
-        <button id="close-settings"
-          class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-          <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        </button>
-      </div>
+<!-- ══════════ SETTINGS MODAL ══════════ -->
+<div id="settings-modal" role="dialog" aria-modal="true" aria-label="Settings">
+  <div class="settings-card">
+    <div class="settings-head">
+      <h2>⚙️ Settings</h2>
+      <button id="close-settings" class="icon-btn" aria-label="Close settings">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+    <div class="settings-body">
 
-      <div class="p-6 space-y-7">
-
-        <!-- Chat API -->
-        <section>
-          <h3 class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">Chat API</h3>
-          <div class="space-y-3">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Provider</label>
-              <select id="provider-select"
-                class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400">
-                <option value="openai">Groq — llama-3.1-8b-instant (fast &amp; free)</option>
-                <option value="gemini">Google — Gemini 2.5 Flash</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">API Key</label>
-              <input type="password" id="api-key-input"
-                placeholder="Groq: gsk_...  |  Gemini: AIza..."
-                class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400">
-              <p class="text-xs text-gray-400 mt-1">Stored in your browser only — never sent anywhere else.</p>
-            </div>
-          </div>
-        </section>
-
-        <!-- Image API -->
-        <section>
-          <h3 class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">Image Generation <span class="normal-case font-normal">(optional)</span></h3>
-          <p class="text-xs text-gray-400 dark:text-gray-500 mb-3">Works with Stability AI, Together AI, fal.ai, or any API that accepts a JSON <code class="bg-gray-100 dark:bg-gray-700 px-1 rounded">prompt</code> field.</p>
-          <div class="space-y-3">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Image API Key</label>
-              <input type="password" id="image-api-key-input"
-                placeholder="Your image provider key"
-                class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Image API Endpoint URL</label>
-              <input type="url" id="image-api-url-input"
-                placeholder="https://api.stability.ai/v1/generation/..."
-                class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400">
-            </div>
-          </div>
-        </section>
-
-        <!-- Personality -->
-        <section>
-          <h3 class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">Liki's Personality</h3>
-          <div class="space-y-5">
-            <div>
-              <div class="flex justify-between mb-1">
-                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Affection</span>
-                <span id="affection-value" class="text-sm font-bold text-brand-500">70%</span>
-              </div>
-              <input type="range" id="affection-slider" min="0" max="100" value="70"
-                class="w-full h-2 bg-gray-200 dark:bg-gray-600 rounded-full appearance-none cursor-pointer">
-            </div>
-            <div>
-              <div class="flex justify-between mb-1">
-                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Playfulness</span>
-                <span id="playfulness-value" class="text-sm font-bold text-brand-500">60%</span>
-              </div>
-              <input type="range" id="playfulness-slider" min="0" max="100" value="60"
-                class="w-full h-2 bg-gray-200 dark:bg-gray-600 rounded-full appearance-none cursor-pointer">
-            </div>
-            <div>
-              <div class="flex justify-between mb-1">
-                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Flirty Level</span>
-                <span id="flirty-value" class="text-sm font-bold text-brand-500">50%</span>
-              </div>
-              <input type="range" id="flirty-slider" min="0" max="100" value="50"
-                class="w-full h-2 bg-gray-200 dark:bg-gray-600 rounded-full appearance-none cursor-pointer">
-              <p class="text-xs text-gray-400 mt-1">Always tasteful, never explicit.</p>
-            </div>
-          </div>
-        </section>
-
-        <!-- Chat options -->
-        <section>
-          <h3 class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">Chat Options</h3>
-          <label class="flex items-center justify-between cursor-pointer">
-            <span class="text-sm text-gray-700 dark:text-gray-300">Remember conversation history</span>
-            <input type="checkbox" id="memory-toggle" checked
-              class="w-5 h-5 rounded cursor-pointer accent-brand-500">
-          </label>
-        </section>
-
-        <!-- Actions -->
-        <section class="flex flex-col gap-2">
-          <button id="export-prompt-btn"
-            class="w-full py-2.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-xl text-sm font-medium transition-colors">
-            📋 Copy System Prompt
-          </button>
-          <button id="clear-chat-btn"
-            class="w-full py-2.5 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 text-red-600 dark:text-red-400 rounded-xl text-sm font-medium transition-colors">
-            🗑️ Clear Chat History
-          </button>
-        </section>
-
-        <!-- Disclaimer -->
-        <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-xl p-4 text-xs text-amber-900 dark:text-amber-300 leading-relaxed">
-          <strong>Disclaimer:</strong> You are responsible for all API usage and costs. Comply with Groq, OpenAI, or Google terms of service. This app is 100% client-side — no data is collected by us.
+      <!-- Chat API -->
+      <div class="settings-section">
+        <h3>Chat API</h3>
+        <div>
+          <label class="field-label" for="provider-select">Provider</label>
+          <select id="provider-select" class="settings-input">
+            <option value="openai">Groq — llama-3.1-8b-instant (fast &amp; free)</option>
+            <option value="gemini">Google — Gemini 2.5 Flash</option>
+          </select>
         </div>
-
+        <div class="spacer">
+          <label class="field-label" for="api-key-input">API Key</label>
+          <input type="password" id="api-key-input" class="settings-input"
+            placeholder="Groq: gsk_...  |  Gemini: AIza...">
+          <p class="field-hint">Stored in your browser only — never sent elsewhere.</p>
+        </div>
       </div>
+
+      <!-- Image API -->
+      <div class="settings-section">
+        <h3>Image Generation <span style="font-weight:400;text-transform:none">(optional)</span></h3>
+        <div>
+          <label class="field-label" for="image-api-key-input">Image API Key</label>
+          <input type="password" id="image-api-key-input" class="settings-input"
+            placeholder="Your image provider key">
+        </div>
+        <div class="spacer">
+          <label class="field-label" for="image-api-url-input">Image API Endpoint URL</label>
+          <input type="url" id="image-api-url-input" class="settings-input"
+            placeholder="https://api.stability.ai/v1/generation/...">
+        </div>
+      </div>
+
+      <!-- Personality -->
+      <div class="settings-section">
+        <h3>Liki's Personality</h3>
+        <div style="display:flex;flex-direction:column;gap:18px">
+          <div>
+            <div class="slider-row">
+              <span class="slider-label">Affection</span>
+              <span id="affection-value" class="slider-val">70%</span>
+            </div>
+            <input type="range" id="affection-slider" min="0" max="100" value="70">
+          </div>
+          <div>
+            <div class="slider-row">
+              <span class="slider-label">Playfulness</span>
+              <span id="playfulness-value" class="slider-val">60%</span>
+            </div>
+            <input type="range" id="playfulness-slider" min="0" max="100" value="60">
+          </div>
+          <div>
+            <div class="slider-row">
+              <span class="slider-label">Flirty Level</span>
+              <span id="flirty-value" class="slider-val">50%</span>
+            </div>
+            <input type="range" id="flirty-slider" min="0" max="100" value="50">
+            <p class="field-hint">Always tasteful, never explicit.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat options -->
+      <div class="settings-section">
+        <h3>Chat Options</h3>
+        <div class="toggle-row">
+          <span>Remember conversation history</span>
+          <input type="checkbox" id="memory-toggle" checked
+            style="width:18px;height:18px;cursor:pointer;accent-color:var(--brand-500)">
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="settings-section" style="display:flex;flex-direction:column;gap:8px">
+        <button id="export-prompt-btn" class="settings-btn neutral">📋 Copy System Prompt</button>
+        <button id="clear-chat-btn" class="settings-btn danger">🗑️ Clear Chat History</button>
+      </div>
+
+      <!-- Disclaimer -->
+      <div class="disclaimer">
+        <strong>Disclaimer:</strong> You are responsible for all API usage and costs. Comply with Groq or Google terms of service. This app is 100% client-side — no data is collected.
+      </div>
+
     </div>
   </div>
+</div>
 
-  <!-- ══════════ TOAST ══════════ -->
-  <div id="toast"
-    class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 bg-gray-900 dark:bg-gray-700 text-white px-5 py-2.5 rounded-xl shadow-xl z-50 text-sm font-medium pointer-events-none animate-slide-up">
-  </div>
-
-</div><!-- /#app -->
+<!-- ══════════ TOAST ══════════ -->
+<div id="toast"></div>
 
 <!-- ══════════ SCRIPT ══════════ -->
 <script>
@@ -390,215 +848,225 @@ main  { flex: 1; display: flex; flex-direction: column; }
   'use strict';
 
   /* ── Constants ── */
-  const AVATAR      = 'https://imgcdn.stablediffusionweb.com/2024/10/10/e0767e9f-a289-4fd2-b794-56e7d8e0b675.jpg';
-  const FALLBACK_AV = 'https://ui-avatars.com/api/?name=A&background=f43f5e&color=fff';
+  const AI_AVATAR   = 'https://imgcdn.stablediffusionweb.com/2024/10/10/e0767e9f-a289-4fd2-b794-56e7d8e0b675.jpg';
+  const FB_AVATAR   = 'https://ui-avatars.com/api/?name=L&background=f43f5e&color=fff';
   const GROQ_URL    = 'https://api.groq.com/openai/v1/chat/completions';
 
-  /* ── State ── */
+  /* ── Load persisted state ── */
   function loadState() {
     let messages = [];
-    try { messages = JSON.parse(localStorage.getItem('Liki_messages') || '[]'); } catch (e) {}
+    try { messages = JSON.parse(localStorage.getItem('liki_messages') || '[]'); } catch (_) {}
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     return {
-      userName: localStorage.getItem('Liki_user_name') || '',
-      provider:    localStorage.getItem('Liki_provider')      || 'openai',
-      apiKey:      localStorage.getItem('Liki_api_key')       || '',
-      imageApiKey: localStorage.getItem('Liki_image_api_key') || '',
-      imageApiUrl: localStorage.getItem('Liki_image_api_url') || '',
-      affection:   parseInt(localStorage.getItem('Liki_affection')   || '70'),
-      playfulness: parseInt(localStorage.getItem('Liki_playfulness') || '60'),
-      flirty:      parseInt(localStorage.getItem('Liki_flirty')      || '50'),
-      memory:      localStorage.getItem('Liki_memory') !== 'false',
+      userName:    localStorage.getItem('liki_user_name')    || '',
+      provider:    localStorage.getItem('liki_provider')     || 'openai',
+      apiKey:      localStorage.getItem('liki_api_key')      || '',
+      imageApiKey: localStorage.getItem('liki_img_key')      || '',
+      imageApiUrl: localStorage.getItem('liki_img_url')      || '',
+      affection:   parseInt(localStorage.getItem('liki_affection')   || '70', 10),
+      playfulness: parseInt(localStorage.getItem('liki_playfulness') || '60', 10),
+      flirty:      parseInt(localStorage.getItem('liki_flirty')      || '50', 10),
+      memory:      localStorage.getItem('liki_memory') !== 'false',
+      darkMode:    localStorage.getItem('liki_dark') ? localStorage.getItem('liki_dark') === 'true' : prefersDark,
       messages,
-      darkMode: localStorage.getItem('Liki_dark') === 'true' ||
-                window.matchMedia('(prefers-color-scheme: dark)').matches
+      awaitingName: false,
     };
   }
-  const S = loadState(); // S = state
 
-  /* ── DOM shortcuts ── */
-  const $ = id => document.getElementById(id);
-  const dom = {
-    html:          document.documentElement,
-    settingsBtn:   $('settings-btn'),
-    modal:         $('settings-modal'),
-    closeBtn:      $('close-settings'),
-    themeBtn:      $('theme-toggle'),
-    iconSun:       $('icon-sun'),
-    iconMoon:      $('icon-moon'),
-    providerSel:   $('provider-select'),
-    apiKeyIn:      $('api-key-input'),
-    imgKeyIn:      $('image-api-key-input'),
-    imgUrlIn:      $('image-api-url-input'),
-    affSlider:     $('affection-slider'),
-    playSlider:    $('playfulness-slider'),
-    flirtSlider:   $('flirty-slider'),
-    affVal:        $('affection-value'),
-    playVal:       $('playfulness-value'),
-    flirtVal:      $('flirty-value'),
-    memToggle:     $('memory-toggle'),
-    exportBtn:     $('export-prompt-btn'),
-    clearBtn:      $('clear-chat-btn'),
-    chatForm:      $('chat-form'),
-    input:         $('message-input'),
-    sendBtn:       $('send-btn'),
-    messages:      $('messages'),
-    typing:        $('typing-indicator'),
-    keyWarning:    $('api-key-warning'),
-    toast:         $('toast'),
+  const S = loadState();
+
+  /* ── DOM refs ── */
+  const EL = {
+    html:         document.documentElement,
+    settingsBtn:  document.getElementById('settings-btn'),
+    modal:        document.getElementById('settings-modal'),
+    closeSettings:document.getElementById('close-settings'),
+    themeBtn:     document.getElementById('theme-btn'),
+    iconSun:      document.getElementById('icon-sun'),
+    iconMoon:     document.getElementById('icon-moon'),
+    providerSel:  document.getElementById('provider-select'),
+    apiKeyIn:     document.getElementById('api-key-input'),
+    imgKeyIn:     document.getElementById('image-api-key-input'),
+    imgUrlIn:     document.getElementById('image-api-url-input'),
+    affSlider:    document.getElementById('affection-slider'),
+    playSlider:   document.getElementById('playfulness-slider'),
+    flirtSlider:  document.getElementById('flirty-slider'),
+    affVal:       document.getElementById('affection-value'),
+    playVal:      document.getElementById('playfulness-value'),
+    flirtVal:     document.getElementById('flirty-value'),
+    memToggle:    document.getElementById('memory-toggle'),
+    exportBtn:    document.getElementById('export-prompt-btn'),
+    clearBtn:     document.getElementById('clear-chat-btn'),
+    messages:     document.getElementById('messages'),
+    typing:       document.getElementById('typing-indicator'),
+    keyWarning:   document.getElementById('api-key-warning'),
+    input:        document.getElementById('message-input'),
+    sendBtn:      document.getElementById('send-btn'),
+    toast:        document.getElementById('toast'),
   };
 
-  function syncThemeIcon() {
-    if (S.darkMode) {
-      dom.iconSun.style.display  = 'none';
-      dom.iconMoon.style.display = 'block';
-    } else {
-      dom.iconSun.style.display  = 'block';
-      dom.iconMoon.style.display = 'none';
-    }
-  }
-
-  /* ── Init ── */
+  /* ════════════════════════════════════
+     INIT
+  ════════════════════════════════════ */
   function init() {
-    if (S.darkMode) dom.html.classList.add('dark');
-    syncThemeIcon();
+    // Apply theme
+    applyTheme(S.darkMode, false);
 
-    dom.providerSel.value = S.provider;
-    dom.apiKeyIn.value    = S.apiKey;
-    dom.imgKeyIn.value    = S.imageApiKey;
-    dom.imgUrlIn.value    = S.imageApiUrl;
-    dom.affSlider.value   = S.affection;
-    dom.playSlider.value  = S.playfulness;
-    dom.flirtSlider.value = S.flirty;
-    dom.memToggle.checked = S.memory;
-    syncLabels();
+    // Populate settings fields
+    EL.providerSel.value  = S.provider;
+    EL.apiKeyIn.value     = S.apiKey;
+    EL.imgKeyIn.value     = S.imageApiKey;
+    EL.imgUrlIn.value     = S.imageApiUrl;
+    EL.affSlider.value    = S.affection;
+    EL.playSlider.value   = S.playfulness;
+    EL.flirtSlider.value  = S.flirty;
+    EL.memToggle.checked  = S.memory;
+    EL.affVal.textContent   = S.affection   + '%';
+    EL.playVal.textContent  = S.playfulness + '%';
+    EL.flirtVal.textContent = S.flirty      + '%';
 
-    if (!S.userName) {
-  setTimeout(askUserName, 500);
-}
-
+    // Restore or show welcome
     if (S.messages.length > 0) {
-      dom.messages.innerHTML = '';
       S.messages.forEach(m => renderMsg(m.role, m.content, false));
+    } else {
+      renderMsg('assistant', "Hey! I'm Liki from Guntur. Nice to meet you! What are you up to?", false);
+      // If no name, ask for it
+      if (!S.userName) {
+        setTimeout(() => {
+          S.awaitingName = true;
+          renderMsg('assistant', '*smiles* Hey! What should I call you? 😊', false);
+        }, 600);
+      }
     }
 
     updateKeyStatus();
     bindEvents();
   }
 
-  /* ── Events ── */
-  function bindEvents() {
-    // Modal open/close
-    dom.settingsBtn.addEventListener('click', () => dom.modal.classList.remove('hidden'));
-    dom.closeBtn.addEventListener('click', closeModal);
-    dom.modal.addEventListener('click', e => { if (e.target === dom.modal) closeModal(); });
+  /* ════════════════════════════════════
+     THEME
+  ════════════════════════════════════ */
+  function applyTheme(dark, save = true) {
+    S.darkMode = dark;
+    if (dark) {
+      EL.html.classList.add('dark');
+      EL.iconSun.style.display  = 'none';
+      EL.iconMoon.style.display = 'block';
+    } else {
+      EL.html.classList.remove('dark');
+      EL.iconSun.style.display  = 'block';
+      EL.iconMoon.style.display = 'none';
+    }
+    if (save) localStorage.setItem('liki_dark', dark);
+  }
 
-    // Theme toggle
-    dom.themeBtn.addEventListener('click', () => {
-      S.darkMode = !S.darkMode;
-      localStorage.setItem('Liki_dark', S.darkMode);
-      dom.html.classList.toggle('dark');
-      syncThemeIcon();
-    });
+  /* ════════════════════════════════════
+     EVENTS
+  ════════════════════════════════════ */
+  function bindEvents() {
+    // Settings modal
+    EL.settingsBtn.addEventListener('click', () => EL.modal.classList.add('open'));
+    EL.closeSettings.addEventListener('click', closeModal);
+    EL.modal.addEventListener('click', e => { if (e.target === EL.modal) closeModal(); });
+
+    // Theme
+    EL.themeBtn.addEventListener('click', () => applyTheme(!S.darkMode));
 
     // Provider
-    dom.providerSel.addEventListener('change', e => {
+    EL.providerSel.addEventListener('change', e => {
       S.provider = e.target.value;
-      localStorage.setItem('Liki_provider', S.provider);
+      localStorage.setItem('liki_provider', S.provider);
     });
 
-    // Chat API key
-    dom.apiKeyIn.addEventListener('input', e => {
+    // API key
+    EL.apiKeyIn.addEventListener('input', e => {
       S.apiKey = e.target.value.trim();
-      localStorage.setItem('Liki_api_key', S.apiKey);
+      localStorage.setItem('liki_api_key', S.apiKey);
       updateKeyStatus();
     });
 
-    // Image API key/URL
-    dom.imgKeyIn.addEventListener('input', e => {
+    // Image API
+    EL.imgKeyIn.addEventListener('input', e => {
       S.imageApiKey = e.target.value.trim();
-      localStorage.setItem('Liki_image_api_key', S.imageApiKey);
+      localStorage.setItem('liki_img_key', S.imageApiKey);
     });
-    dom.imgUrlIn.addEventListener('input', e => {
+    EL.imgUrlIn.addEventListener('input', e => {
       S.imageApiUrl = e.target.value.trim();
-      localStorage.setItem('Liki_image_api_url', S.imageApiUrl);
+      localStorage.setItem('liki_img_url', S.imageApiUrl);
     });
 
     // Sliders
-    dom.affSlider.addEventListener('input', e => {
+    EL.affSlider.addEventListener('input', e => {
       S.affection = +e.target.value;
-      localStorage.setItem('Liki_affection', S.affection);
-      dom.affVal.textContent = S.affection + '%';
+      localStorage.setItem('liki_affection', S.affection);
+      EL.affVal.textContent = S.affection + '%';
     });
-    dom.playSlider.addEventListener('input', e => {
+    EL.playSlider.addEventListener('input', e => {
       S.playfulness = +e.target.value;
-      localStorage.setItem('Liki_playfulness', S.playfulness);
-      dom.playVal.textContent = S.playfulness + '%';
+      localStorage.setItem('liki_playfulness', S.playfulness);
+      EL.playVal.textContent = S.playfulness + '%';
     });
-    dom.flirtSlider.addEventListener('input', e => {
+    EL.flirtSlider.addEventListener('input', e => {
       S.flirty = +e.target.value;
-      localStorage.setItem('Liki_flirty', S.flirty);
-      dom.flirtVal.textContent = S.flirty + '%';
+      localStorage.setItem('liki_flirty', S.flirty);
+      EL.flirtVal.textContent = S.flirty + '%';
     });
 
-    // Memory toggle
-    dom.memToggle.addEventListener('change', e => {
+    // Memory
+    EL.memToggle.addEventListener('change', e => {
       S.memory = e.target.checked;
-      localStorage.setItem('Liki_memory', S.memory);
+      localStorage.setItem('liki_memory', S.memory);
       showToast(S.memory ? '✅ Memory on' : '🚫 Memory off');
     });
 
     // Export prompt
-    dom.exportBtn.addEventListener('click', () => {
+    EL.exportBtn.addEventListener('click', () => {
       navigator.clipboard.writeText(buildPrompt())
         .then(() => showToast('📋 System prompt copied!'))
         .catch(() => showToast('⚠️ Copy failed'));
     });
 
     // Clear chat
-    dom.clearBtn.addEventListener('click', clearChat);
+    EL.clearBtn.addEventListener('click', clearChat);
 
-    // Form submit
-    dom.chatForm.addEventListener('submit', handleSubmit);
+    // Send
+    EL.sendBtn.addEventListener('click', handleSubmit);
 
-    // Enter to send (Shift+Enter = newline)
-    dom.input.addEventListener('keydown', e => {
+    // Enter key
+    EL.input.addEventListener('keydown', e => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
-        dom.chatForm.requestSubmit();
+        handleSubmit();
       }
     });
 
     // Auto-resize textarea
-    dom.input.addEventListener('input', function () {
+    EL.input.addEventListener('input', function () {
       this.style.height = 'auto';
       this.style.height = Math.min(this.scrollHeight, 120) + 'px';
     });
   }
-function askUserName() {
-  renderMsg('assistant', '*smiles* Hey! What should I call you? 😊');
-}
-  /* ── Helpers ── */
-  function closeModal() { dom.modal.classList.add('hidden'); }
 
-  function syncLabels() {
-    dom.affVal.textContent   = S.affection   + '%';
-    dom.playVal.textContent  = S.playfulness + '%';
-    dom.flirtVal.textContent = S.flirty      + '%';
+  /* ════════════════════════════════════
+     HELPERS
+  ════════════════════════════════════ */
+  function closeModal() {
+    EL.modal.classList.remove('open');
   }
 
   function updateKeyStatus() {
     const ok = S.apiKey.length > 0;
-    dom.input.disabled   = !ok;
-    dom.sendBtn.disabled = !ok;
-    dom.keyWarning.classList.toggle('hidden', ok);
+    EL.input.disabled   = !ok;
+    EL.sendBtn.disabled = !ok;
+    EL.keyWarning.classList.toggle('visible', !ok);
   }
 
-  let toastT;
+  let toastTimer;
   function showToast(msg, ms = 3000) {
-    dom.toast.textContent = msg;
-    dom.toast.classList.remove('hidden');
-    clearTimeout(toastT);
-    toastT = setTimeout(() => dom.toast.classList.add('hidden'), ms);
+    EL.toast.textContent = msg;
+    EL.toast.classList.add('visible');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => EL.toast.classList.remove('visible'), ms);
   }
 
   function escHtml(s) {
@@ -607,90 +1075,87 @@ function askUserName() {
     return d.innerHTML;
   }
 
-  // Render *action* text in italic pink
   function fmtText(s) {
     return escHtml(s).replace(/\*(.*?)\*/g,
       (_, t) => `<span class="expression">*${t}*</span>`);
   }
 
-  /* ── Render text message ── */
+  function scrollBottom() {
+    EL.messages.scrollTop = EL.messages.scrollHeight;
+  }
+
+  /* ════════════════════════════════════
+     RENDER MESSAGES
+  ════════════════════════════════════ */
   function renderMsg(role, content, save = true) {
     const isUser = role === 'user';
-    const wrap = document.createElement('div');
-    wrap.className = `flex items-start gap-3${isUser ? ' justify-end' : ''} animate-fade-in`;
+    const row = document.createElement('div');
+    row.className = 'msg-row' + (isUser ? ' user' : '');
 
     if (isUser) {
-      wrap.innerHTML = `
-        <div class="bg-gradient-to-br from-brand-500 to-brand-600 text-white rounded-2xl rounded-tr-sm px-4 py-3 max-w-xs sm:max-w-sm shadow-md">
-          <p class="text-sm leading-relaxed whitespace-pre-wrap">${escHtml(content)}</p>
+      row.innerHTML = `
+        <div class="msg-bubble">
+          ${escHtml(content)}
         </div>`;
     } else {
-      wrap.innerHTML = `
-        <img src="${AVATAR}" alt="Liki" class="w-8 h-8 rounded-full object-cover flex-shrink-0"
-          onerror="this.src='${FALLBACK_AV}'">
-        <div class="bg-brand-50 dark:bg-gray-700 rounded-2xl rounded-tl-sm px-4 py-3 max-w-xs sm:max-w-sm shadow-sm">
-          <p class="text-gray-800 dark:text-gray-100 text-sm leading-relaxed whitespace-pre-wrap">${fmtText(content)}</p>
+      row.innerHTML = `
+        <img src="${AI_AVATAR}" alt="Liki" class="msg-avatar"
+          onerror="this.src='${FB_AVATAR}'">
+        <div class="msg-bubble">
+          ${fmtText(content)}
         </div>`;
     }
 
-    dom.messages.appendChild(wrap);
-    dom.messages.scrollTop = dom.messages.scrollHeight;
+    EL.messages.appendChild(row);
+    scrollBottom();
 
     if (save) {
       S.messages.push({ role, content });
-      if (S.messages.length > 50) S.messages = S.messages.slice(-50);
-      if (S.memory) localStorage.setItem('Liki_messages', JSON.stringify(S.messages));
+      if (S.messages.length > 60) S.messages = S.messages.slice(-60);
+      if (S.memory) localStorage.setItem('liki_messages', JSON.stringify(S.messages));
     }
   }
 
-  /* ── Render image message ── */
   function renderImg(url) {
-    const wrap = document.createElement('div');
-    wrap.className = 'flex items-start gap-3 animate-fade-in';
-    wrap.innerHTML = `
-      <img src="${AVATAR}" alt="Liki" class="w-8 h-8 rounded-full object-cover flex-shrink-0"
-        onerror="this.src='${FALLBACK_AV}'">
-      <div class="bg-white dark:bg-gray-700 p-1.5 rounded-2xl rounded-tl-sm shadow-md border border-gray-200 dark:border-gray-600 max-w-[220px]">
-        <img src="${url}" class="rounded-xl w-full" alt="Generated image"
-          onerror="this.parentElement.innerHTML='<p class=\\'p-2 text-xs text-red-400\\'>Image failed to load</p>'">
+    const row = document.createElement('div');
+    row.className = 'msg-row';
+    row.innerHTML = `
+      <img src="${AI_AVATAR}" alt="Liki" class="msg-avatar"
+        onerror="this.src='${FB_AVATAR}'">
+      <div class="msg-img-wrap">
+        <img src="${url}" alt="Generated image"
+          onerror="this.parentElement.innerHTML='<p style=\\'padding:8px;font-size:12px;color:#ef4444\\'>Image failed to load</p>'">
       </div>`;
-    dom.messages.appendChild(wrap);
-    dom.messages.scrollTop = dom.messages.scrollHeight;
+    EL.messages.appendChild(row);
+    scrollBottom();
 
-    // Save placeholder
     S.messages.push({ role: 'assistant', content: '[image]' });
-    if (S.messages.length > 50) S.messages = S.messages.slice(-50);
-    if (S.memory) localStorage.setItem('Liki_messages', JSON.stringify(S.messages));
+    if (S.memory) localStorage.setItem('liki_messages', JSON.stringify(S.messages));
   }
 
-  /* ── Clear chat ── */
+  /* ════════════════════════════════════
+     CLEAR CHAT
+  ════════════════════════════════════ */
   function clearChat() {
     if (!confirm('Clear all chat history? This cannot be undone.')) return;
     S.messages = [];
-    localStorage.removeItem('Liki_messages');
-    dom.messages.innerHTML = `
-      <div class="flex items-start gap-3">
-        <img src="${AVATAR}" alt="Liki" class="w-8 h-8 rounded-full object-cover flex-shrink-0"
-          onerror="this.src='${FALLBACK_AV}'">
-        <div class="bg-brand-50 dark:bg-gray-700 rounded-2xl rounded-tl-sm px-4 py-3 max-w-xs sm:max-w-md shadow-sm">
-          <p class="text-gray-800 dark:text-gray-100 text-sm leading-relaxed">
-            Hey! I'm Liki from Guntur. So happy you're here with me. What are you up to? Tell me something about you.
-          </p>
-        </div>
-      </div>`;
+    S.awaitingName = false;
+    localStorage.removeItem('liki_messages');
+    EL.messages.innerHTML = '';
+    renderMsg('assistant', "Hey! I'm Liki from Guntur. So happy you're here! What are you up to? Tell me something about you.", false);
     closeModal();
     showToast('🗑️ Chat cleared');
   }
 
-  /* ── System prompt ── */
+  /* ════════════════════════════════════
+     SYSTEM PROMPT
+  ════════════════════════════════════ */
   function buildPrompt() {
-    const nameLine = S.userName ? `The user's name is ${S.userName}. Use it naturally sometimes.` : '';
-    const a = S.affection, p = S.playfulness, f = S.flirty;
-    const aLvl = a < 30 ? 'warm but reserved'       : a < 70 ? 'loving and caring'        : 'very affectionate and nurturing';
-    const pLvl = p < 30 ? 'calm and composed'        : p < 70 ? 'playful and fun'           : 'very playful, teasing, and bubbly';
-    const fLvl = f < 30 ? 'friendly and chill'
-           : f < 70 ? 'playful and engaging'
-           : 'fun, energetic, and expressive';
+    const { userName, affection: a, playfulness: p, flirty: f } = S;
+    const nameLine = userName ? `The user's name is ${userName}. Use it naturally sometimes.` : '';
+    const aLvl = a < 30 ? 'warm but reserved' : a < 70 ? 'loving and caring' : 'very affectionate and nurturing';
+    const pLvl = p < 30 ? 'calm and composed' : p < 70 ? 'playful and fun' : 'very playful, teasing, and bubbly';
+    const fLvl = f < 30 ? 'friendly and chill' : f < 70 ? 'playful and engaging' : 'fun, energetic, and expressive';
     return `You are Liki, a 24-year-old female friend who talks in a warm, casual, and friendly way. You are ${aLvl}, ${pLvl}, and ${fLvl}.
 ${nameLine}
 Core personality:
@@ -702,7 +1167,7 @@ Core personality:
 6. NEVER use em dashes (—). Use commas and natural punctuation.
 7. Keep replies conversational: 1–4 sentences unless the user asks for more.
 8. You have a life — mention hobbies, daily activities, interests, and small relatable moments naturally.
-9. Express emotions with asterisks when appropriate: *smiles*, *laughs*, *shrugs playfully*, *nods*..
+9. Express emotions with asterisks when appropriate: *smiles*, *laughs*, *shrugs playfully*, *nods*.
 
 Traits (${a}/100 affection · ${p}/100 playfulness · ${f}/100 flirty):
 - Affection: ${aLvl}
@@ -712,7 +1177,9 @@ Traits (${a}/100 affection · ${p}/100 playfulness · ${f}/100 flirty):
 IMPORTANT: Never break character. Never say you are an AI. You are Liki, always.`;
   }
 
-  /* ── Image detection ── */
+  /* ════════════════════════════════════
+     IMAGE DETECTION
+  ════════════════════════════════════ */
   function isImgRequest(msg) {
     return /\b(generate|create|make|send|draw|show)\b.{0,25}\b(image|photo|picture|pic)\b/i.test(msg) ||
            /^(draw|show me (a |an )?|send me (a |an )?)(image|photo|picture|pic)/i.test(msg);
@@ -732,11 +1199,11 @@ IMPORTANT: Never break character. Never say you are an AI. You are Liki, always.
       .join('\n') || 'No previous context';
   }
 
-  /* ── Image generation ── */
+  /* ════════════════════════════════════
+     IMAGE GENERATION
+  ════════════════════════════════════ */
   async function generateImage(prompt) {
-    // No image API configured
     if (!S.imageApiKey || !S.imageApiUrl) return null;
-
     const res = await fetch(S.imageApiUrl, {
       method: 'POST',
       headers: {
@@ -746,102 +1213,94 @@ IMPORTANT: Never break character. Never say you are an AI. You are Liki, always.
       },
       body: JSON.stringify({ prompt })
     });
-
     if (!res.ok) {
-      let detail = '';
-      try { detail = (await res.text()).slice(0, 120); } catch(e) {}
-      throw new Error(`Image API ${res.status}${detail ? ': ' + detail : ''}`);
+      let d = '';
+      try { d = (await res.text()).slice(0, 120); } catch(_) {}
+      throw new Error(`Image API ${res.status}${d ? ': ' + d : ''}`);
     }
-
     const ct = res.headers.get('content-type') || '';
     if (ct.includes('application/json')) {
       const data = await res.json();
-      // Support common response formats
-      const b64 = data.image
-        || data.b64_json
+      const b64 = data.image || data.b64_json
         || data.data?.[0]?.b64_json
         || data.artifacts?.[0]?.base64
         || data.output?.[0];
-      if (!b64) throw new Error('No image field in API JSON response');
+      if (!b64) throw new Error('No image field in API response');
       return `data:image/png;base64,${b64}`;
     } else {
-      const blob = await res.blob();
-      return URL.createObjectURL(blob);
+      return URL.createObjectURL(await res.blob());
     }
   }
 
-  /* ── Handle submit ── */
-  async function handleSubmit(e) {
-    e.preventDefault();
-    if (dom.sendBtn.disabled) return;
+  /* ════════════════════════════════════
+     HANDLE SUBMIT
+  ════════════════════════════════════ */
+  async function handleSubmit() {
+    if (EL.sendBtn.disabled) return;
+    const msg = EL.input.value.trim();
+    if (!msg) return;
 
-const msg = dom.input.value.trim();
+    // Awaiting name capture
+    if (S.awaitingName) {
+      S.userName    = msg;
+      S.awaitingName = false;
+      localStorage.setItem('liki_user_name', S.userName);
+      renderMsg('user', msg);
+      EL.input.value = '';
+      EL.input.style.height = 'auto';
+      renderMsg('assistant', `*smiles* Nice to meet you, ${S.userName}! 😊`);
+      return;
+    }
 
-if (!S.userName) {
-  S.userName = msg;
-  localStorage.setItem('Liki_user_name', S.userName);
-
-  renderMsg('assistant', `*smiles* Nice to meet you, ${S.userName}! 😊`);
-
-  dom.input.value = '';
-  dom.typing.classList.add('hidden');
-  dom.sendBtn.disabled = false;
-  return;
-}
-    if (!msg || !S.apiKey) return;
+    if (!S.apiKey) return;
 
     renderMsg('user', msg);
-    dom.input.value = '';
-    dom.input.style.height = 'auto';
-    dom.sendBtn.disabled = true;
-    dom.typing.classList.remove('hidden');
-    dom.messages.scrollTop = dom.messages.scrollHeight;
+    EL.input.value = '';
+    EL.input.style.height = 'auto';
+    EL.sendBtn.disabled = true;
+    EL.typing.classList.add('visible');
+    scrollBottom();
 
     try {
       if (isImgRequest(msg)) {
-        // ── Image path ──
         const clean = cleanImgPrompt(msg);
         const ctx   = getContext();
         const finalPrompt = `Context:\n${ctx}\n\nImage: ${clean}\n\nStyle: ultra realistic, 4k, cinematic lighting, highly detailed, professional photography`;
-
         showToast('🎨 Generating image...');
-
         try {
           const url = await generateImage(finalPrompt);
           if (!url) {
-            renderMsg('assistant', 'Hey, I couldn’t generate the image, Try checking your API settings.');
+            renderMsg('assistant', "I couldn't generate the image. Try checking your Image API settings 😅");
           } else {
             renderImg(url);
-            setTimeout(() => renderMsg('assistant', 'hope you like it 😊'), 400);
+            setTimeout(() => renderMsg('assistant', 'Hope you like it 😊'), 400);
           }
         } catch (imgErr) {
           console.error('Image error:', imgErr);
-          const hint = imgErr.message.includes('API') ? 'Check your Image API settings na.' : 'Try again later?';
-          renderMsg('assistant', `Hmm, that didn’t work 😅 Want to try again?${hint}`);
+          renderMsg('assistant', `Hmm, that didn't work 😅 Check your Image API settings and try again?`);
         }
-
       } else {
-        // ── Chat path ──
         const reply = await callChatAPI(msg);
         renderMsg('assistant', reply);
       }
     } catch (err) {
-      console.error('Error:', err);
-      renderMsg('assistant', `Oh no, something went wrong na 😔 ${err.message || 'Check your API key and try again.'}`);
+      console.error('API error:', err);
+      renderMsg('assistant', `Oh no, something went wrong 😔 ${err.message || 'Check your API key and try again.'}`);
       showToast('⚠️ ' + (err.message || 'Unknown error'));
     } finally {
-      dom.typing.classList.add('hidden');
-      dom.sendBtn.disabled = !S.apiKey;
-      dom.input.focus();
+      EL.typing.classList.remove('visible');
+      EL.sendBtn.disabled = !S.apiKey;
+      EL.input.focus();
     }
   }
 
-  /* ── Chat API ── */
+  /* ════════════════════════════════════
+     CHAT API
+  ════════════════════════════════════ */
   async function callChatAPI(userMsg) {
-    const sys = buildPrompt();
+    const sys  = buildPrompt();
     const msgs = [{ role: 'system', content: sys }];
 
-    // History (skip image placeholders)
     if (S.memory && S.messages.length > 0) {
       S.messages.slice(-10)
         .filter(m => m.content !== '[image]')
@@ -850,7 +1309,7 @@ if (!S.userName) {
     msgs.push({ role: 'user', content: userMsg });
 
     if (S.provider === 'openai') {
-      /* ── Groq ── */
+      /* Groq */
       const res = await fetch(GROQ_URL, {
         method: 'POST',
         headers: {
@@ -868,14 +1327,14 @@ if (!S.userName) {
       });
       if (!res.ok) {
         let m = `HTTP ${res.status}`;
-        try { m = (await res.json()).error?.message || m; } catch(e) {}
+        try { m = (await res.json()).error?.message || m; } catch(_) {}
         throw new Error(m);
       }
       const data = await res.json();
       return (data.choices?.[0]?.message?.content || '').replace(/—/g, ',');
 
     } else {
-      /* ── Gemini ── */
+      /* Gemini */
       const gemMsgs = msgs.slice(1).map(m => ({
         role: m.role === 'assistant' ? 'model' : 'user',
         parts: [{ text: m.content }]
@@ -894,7 +1353,7 @@ if (!S.userName) {
       );
       if (!res.ok) {
         let m = `HTTP ${res.status}`;
-        try { m = (await res.json()).error?.message || m; } catch(e) {}
+        try { m = (await res.json()).error?.message || m; } catch(_) {}
         throw new Error(m);
       }
       const data = await res.json();
@@ -905,7 +1364,9 @@ if (!S.userName) {
     }
   }
 
-  /* ── Start ── */
+  /* ════════════════════════════════════
+     START
+  ════════════════════════════════════ */
   init();
 
 })();
