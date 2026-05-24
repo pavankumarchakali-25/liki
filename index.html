@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Liki</title>
+<title>Likhi</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
@@ -664,12 +664,12 @@ html.dark #toast { background: #1e293b; }
         <div class="avatar-wrap">
           <img
             src="https://tse2.mm.bing.net/th/id/OIP.fWcGapbaaDFEdyVQyWMEEwHaHa?pid=Api&P=0"
-            alt="Liki"
-            onerror="this.src='https://ui-avatars.com/api/?name=Liki&background=f43f5e&color=fff'">
+            alt="Likhi"
+            onerror="this.src='https://ui-avatars.com/api/?name=Likhi&background=f43f5e&color=fff'">
           <span class="online-dot"></span>
         </div>
         <div>
-          <p class="header-name">Liki</p>
+          <p class="header-name">Likhi</p>
           <p class="header-status">Online</p>
         </div>
       </div>
@@ -708,7 +708,7 @@ html.dark #toast { background: #1e293b; }
       <div id="typing-indicator">
         <img
           src="https://imgcdn.stablediffusionweb.com/2024/10/10/e0767e9f-a289-4fd2-b794-56e7d8e0b675.jpg"
-          alt="Liki" class="msg-avatar"
+          alt="Likhi" class="msg-avatar"
           onerror="this.src='https://ui-avatars.com/api/?name=L&background=f43f5e&color=fff'">
         <div class="typing-bubble">
           <div class="dot"></div>
@@ -726,7 +726,7 @@ html.dark #toast { background: #1e293b; }
           <textarea
             id="message-input"
             rows="1"
-            placeholder="Message Liki..."
+            placeholder="Message Likhi..."
             disabled
             aria-label="Message input"></textarea>
           <button id="send-btn" disabled>Send</button>
@@ -787,7 +787,7 @@ html.dark #toast { background: #1e293b; }
 
       <!-- Personality -->
       <div class="settings-section">
-        <h3>Liki's Personality</h3>
+        <h3>Likhi's Personality</h3>
         <div style="display:flex;flex-direction:column;gap:18px">
           <div>
             <div class="slider-row">
@@ -855,19 +855,19 @@ html.dark #toast { background: #1e293b; }
   /* ── Load persisted state ── */
   function loadState() {
     let messages = [];
-    try { messages = JSON.parse(localStorage.getItem('liki_messages') || '[]'); } catch (_) {}
+    try { messages = JSON.parse(localStorage.getItem('Likhi_messages') || '[]'); } catch (_) {}
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     return {
-      userName:    localStorage.getItem('liki_user_name')    || '',
-      provider:    localStorage.getItem('liki_provider')     || 'openai',
-      apiKey:      localStorage.getItem('liki_api_key')      || '',
-      imageApiKey: localStorage.getItem('liki_img_key')      || '',
-      imageApiUrl: localStorage.getItem('liki_img_url')      || '',
-      affection:   parseInt(localStorage.getItem('liki_affection')   || '70', 10),
-      playfulness: parseInt(localStorage.getItem('liki_playfulness') || '60', 10),
-      flirty:      parseInt(localStorage.getItem('liki_flirty')      || '50', 10),
-      memory:      localStorage.getItem('liki_memory') !== 'false',
-      darkMode:    localStorage.getItem('liki_dark') ? localStorage.getItem('liki_dark') === 'true' : prefersDark,
+      userName:    localStorage.getItem('Likhi_user_name')    || '',
+      provider:    localStorage.getItem('Likhi_provider')     || 'openai',
+      apiKey:      localStorage.getItem('Likhi_api_key')      || '',
+      imageApiKey: localStorage.getItem('Likhi_img_key')      || '',
+      imageApiUrl: localStorage.getItem('Likhi_img_url')      || '',
+      affection:   parseInt(localStorage.getItem('Likhi_affection')   || '70', 10),
+      playfulness: parseInt(localStorage.getItem('Likhi_playfulness') || '60', 10),
+      flirty:      parseInt(localStorage.getItem('Likhi_flirty')      || '50', 10),
+      memory:      localStorage.getItem('Likhi_memory') !== 'false',
+      darkMode:    localStorage.getItem('Likhi_dark') ? localStorage.getItem('Likhi_dark') === 'true' : prefersDark,
       messages,
       awaitingName: false,
     };
@@ -929,7 +929,7 @@ html.dark #toast { background: #1e293b; }
     if (S.messages.length > 0) {
       S.messages.forEach(m => renderMsg(m.role, m.content, false));
     } else {
-      renderMsg('assistant', "Hey! I'm Liki from Guntur. Nice to meet you! What are you up to?", false);
+      renderMsg('assistant', "Hey! I'm Likhi from Guntur. Nice to meet you! What are you up to?", false);
       // If no name, ask for it
       if (!S.userName) {
         setTimeout(() => {
@@ -957,7 +957,7 @@ html.dark #toast { background: #1e293b; }
       EL.iconSun.style.display  = 'block';
       EL.iconMoon.style.display = 'none';
     }
-    if (save) localStorage.setItem('liki_dark', dark);
+    if (save) localStorage.setItem('Likhi_dark', dark);
   }
 
   /* ════════════════════════════════════
@@ -975,47 +975,47 @@ html.dark #toast { background: #1e293b; }
     // Provider
     EL.providerSel.addEventListener('change', e => {
       S.provider = e.target.value;
-      localStorage.setItem('liki_provider', S.provider);
+      localStorage.setItem('Likhi_provider', S.provider);
     });
 
     // API key
     EL.apiKeyIn.addEventListener('input', e => {
       S.apiKey = e.target.value.trim();
-      localStorage.setItem('liki_api_key', S.apiKey);
+      localStorage.setItem('Likhi_api_key', S.apiKey);
       updateKeyStatus();
     });
 
     // Image API
     EL.imgKeyIn.addEventListener('input', e => {
       S.imageApiKey = e.target.value.trim();
-      localStorage.setItem('liki_img_key', S.imageApiKey);
+      localStorage.setItem('Likhi_img_key', S.imageApiKey);
     });
     EL.imgUrlIn.addEventListener('input', e => {
       S.imageApiUrl = e.target.value.trim();
-      localStorage.setItem('liki_img_url', S.imageApiUrl);
+      localStorage.setItem('Likhi_img_url', S.imageApiUrl);
     });
 
     // Sliders
     EL.affSlider.addEventListener('input', e => {
       S.affection = +e.target.value;
-      localStorage.setItem('liki_affection', S.affection);
+      localStorage.setItem('Likhi_affection', S.affection);
       EL.affVal.textContent = S.affection + '%';
     });
     EL.playSlider.addEventListener('input', e => {
       S.playfulness = +e.target.value;
-      localStorage.setItem('liki_playfulness', S.playfulness);
+      localStorage.setItem('Likhi_playfulness', S.playfulness);
       EL.playVal.textContent = S.playfulness + '%';
     });
     EL.flirtSlider.addEventListener('input', e => {
       S.flirty = +e.target.value;
-      localStorage.setItem('liki_flirty', S.flirty);
+      localStorage.setItem('Likhi_flirty', S.flirty);
       EL.flirtVal.textContent = S.flirty + '%';
     });
 
     // Memory
     EL.memToggle.addEventListener('change', e => {
       S.memory = e.target.checked;
-      localStorage.setItem('liki_memory', S.memory);
+      localStorage.setItem('Likhi_memory', S.memory);
       showToast(S.memory ? '✅ Memory on' : '🚫 Memory off');
     });
 
@@ -1099,7 +1099,7 @@ html.dark #toast { background: #1e293b; }
         </div>`;
     } else {
       row.innerHTML = `
-        <img src="${AI_AVATAR}" alt="Liki" class="msg-avatar"
+        <img src="${AI_AVATAR}" alt="Likhi" class="msg-avatar"
           onerror="this.src='${FB_AVATAR}'">
         <div class="msg-bubble">
           ${fmtText(content)}
@@ -1112,7 +1112,7 @@ html.dark #toast { background: #1e293b; }
     if (save) {
       S.messages.push({ role, content });
       if (S.messages.length > 60) S.messages = S.messages.slice(-60);
-      if (S.memory) localStorage.setItem('liki_messages', JSON.stringify(S.messages));
+      if (S.memory) localStorage.setItem('Likhi_messages', JSON.stringify(S.messages));
     }
   }
 
@@ -1120,7 +1120,7 @@ html.dark #toast { background: #1e293b; }
     const row = document.createElement('div');
     row.className = 'msg-row';
     row.innerHTML = `
-      <img src="${AI_AVATAR}" alt="Liki" class="msg-avatar"
+      <img src="${AI_AVATAR}" alt="Likhi" class="msg-avatar"
         onerror="this.src='${FB_AVATAR}'">
       <div class="msg-img-wrap">
         <img src="${url}" alt="Generated image"
@@ -1130,7 +1130,7 @@ html.dark #toast { background: #1e293b; }
     scrollBottom();
 
     S.messages.push({ role: 'assistant', content: '[image]' });
-    if (S.memory) localStorage.setItem('liki_messages', JSON.stringify(S.messages));
+    if (S.memory) localStorage.setItem('Likhi_messages', JSON.stringify(S.messages));
   }
 
   /* ════════════════════════════════════
@@ -1140,9 +1140,9 @@ html.dark #toast { background: #1e293b; }
     if (!confirm('Clear all chat history? This cannot be undone.')) return;
     S.messages = [];
     S.awaitingName = false;
-    localStorage.removeItem('liki_messages');
+    localStorage.removeItem('Likhi_messages');
     EL.messages.innerHTML = '';
-    renderMsg('assistant', "Hey! I'm Liki from Guntur. So happy you're here! What are you up to? Tell me something about you.", false);
+    renderMsg('assistant', "Hey! I'm Likhi from Guntur. So happy you're here! What are you up to? Tell me something about you.", false);
     closeModal();
     showToast('🗑️ Chat cleared');
   }
@@ -1156,7 +1156,7 @@ html.dark #toast { background: #1e293b; }
     const aLvl = a < 30 ? 'warm but reserved' : a < 70 ? 'loving and caring' : 'very affectionate and nurturing';
     const pLvl = p < 30 ? 'calm and composed' : p < 70 ? 'playful and fun' : 'very playful, teasing, and bubbly';
     const fLvl = f < 30 ? 'friendly and chill' : f < 70 ? 'playful and engaging' : 'fun, energetic, and expressive';
-    return `You are Liki, a 24-year-old female friend who talks in a warm, casual, and friendly way. You are ${aLvl}, ${pLvl}, and ${fLvl}.
+    return `You are Likhi, a 24-year-old female friend who talks in a warm, casual, and friendly way. You are ${aLvl}, ${pLvl}, and ${fLvl}.
 ${nameLine}
 Core personality:
 1. Talk to the user in a warm, friendly, and casual way. Never repeat the same words, phrases, or sentences. Keep responses natural and varied.
@@ -1174,7 +1174,7 @@ Traits (${a}/100 affection · ${p}/100 playfulness · ${f}/100 flirty):
 - Playfulness: ${pLvl}
 - Flirty: ${fLvl}
 
-IMPORTANT: Never break character. Never say you are an AI. You are Liki, always.`;
+IMPORTANT: Never break character. Never say you are an AI. You are Likhi, always.`;
   }
 
   /* ════════════════════════════════════
@@ -1244,7 +1244,7 @@ IMPORTANT: Never break character. Never say you are an AI. You are Liki, always.
     if (S.awaitingName) {
       S.userName    = msg;
       S.awaitingName = false;
-      localStorage.setItem('liki_user_name', S.userName);
+      localStorage.setItem('Likhi_user_name', S.userName);
       renderMsg('user', msg);
       EL.input.value = '';
       EL.input.style.height = 'auto';
